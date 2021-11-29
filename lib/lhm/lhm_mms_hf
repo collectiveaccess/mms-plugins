@@ -16,13 +16,8 @@ require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'Sa
 require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'media.php');
 
 // utilities needed to parse command line options and initialize logging
-require_once(__CA_LIB_DIR__."/core/Zend/Console/Getopt.php");
 require_once(__CA_APP_DIR__."/helpers/CLIHelpers.php");
-require_once(__CA_LIB_DIR__."/ca/Utils/CLIUtils.php");
-require_once(__CA_LIB_DIR__."/core/Zend/Log.php");
-require_once(__CA_LIB_DIR__."/core/Zend/Log/Writer/Stream.php");
-require_once(__CA_LIB_DIR__."/core/Zend/Log/Writer/Syslog.php");
-require_once(__CA_LIB_DIR__."/core/Zend/Log/Formatter/Simple.php");
+require_once(__CA_LIB_DIR__."/Utils/CLIUtils.php");
 
 // Konfigurationsdatei
 $o_hf_conf = new Configuration(dirname(__FILE__).DIRECTORY_SEPARATOR.'conf'.DIRECTORY_SEPARATOR.'hot_folder.conf');

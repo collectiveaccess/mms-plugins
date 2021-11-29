@@ -23,13 +23,9 @@ require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'co
 require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'Dispatcher.php');
 
 // utilities needed to parse command line options and initialize logging
-require_once(__CA_LIB_DIR__."/core/Zend/Console/Getopt.php");
+require_once(__CA_LIB_DIR__."/Zend/Console/Getopt.php");
 require_once(__CA_APP_DIR__."/helpers/CLIHelpers.php");
-require_once(__CA_LIB_DIR__."/ca/Utils/CLIUtils.php");
-require_once(__CA_LIB_DIR__."/core/Zend/Log.php");
-require_once(__CA_LIB_DIR__."/core/Zend/Log/Writer/Stream.php");
-require_once(__CA_LIB_DIR__."/core/Zend/Log/Writer/Syslog.php");
-require_once(__CA_LIB_DIR__."/core/Zend/Log/Formatter/Simple.php");
+require_once(__CA_LIB_DIR__."/Utils/CLIUtils.php");
 
 $g_ui_locale = __LHM_MMS_DEFAULT_LOCALE__;
 

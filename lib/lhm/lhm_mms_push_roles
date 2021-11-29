@@ -8,8 +8,8 @@ if(!_caLoadSetupPHP()) {
 	die("CollectiveAccess setup.php Konfiguration konnte nicht gefunden werden! Setzen Sie die COLLECTIVEACCESS_HOME Umgebungsvariable oder führen Sie das Script aus einem Unterverzeichnis von CollectiveAccess aus.\n");
 }
 
-require_once(__CA_LIB_DIR__.'/core/Db.php');
-require_once(__CA_LIB_DIR__.'/ca/Utils/CLIUtils.php');
+require_once(__CA_LIB_DIR__.'/Db.php');
+require_once(__CA_LIB_DIR__.'/Utils/CLIUtils.php');
 require_once(__CA_MODELS_DIR__.'/ca_user_roles.php');
 
 $o_db = new Db();
