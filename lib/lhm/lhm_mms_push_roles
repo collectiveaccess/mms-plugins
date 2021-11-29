@@ -1,0 +1,67 @@
+#!/usr/bin/env php
+<?php
+
+require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'utils.php');
+
+// try and load setup.php
+if(!_caLoadSetupPHP()) {
+	die("CollectiveAccess setup.php Konfiguration konnte nicht gefunden werden! Setzen Sie die COLLECTIVEACCESS_HOME Umgebungsvariable oder führen Sie das Script aus einem Unterverzeichnis von CollectiveAccess aus.\n");
+}
+
+require_once(__CA_LIB_DIR__.'/core/Db.php');
+require_once(__CA_LIB_DIR__.'/ca/Utils/CLIUtils.php');
+require_once(__CA_MODELS_DIR__.'/ca_user_roles.php');
+
+$o_db = new Db();
+
+$qr_roles = $o_db->query('SELECT * FROM ca_user_roles ORDER BY role_id');
+$t_role = new ca_user_roles();
+
+$va_data = array();
+
+while($qr_roles->nextRow()) {
+	$t_role->load($qr_roles->get('role_id'));
+
+	$va_data[$qr_roles->get('code')] = array(
+		'name' => $qr_roles->get('name'),
+		'code' => $qr_roles->get('code'),
+		'description' => $qr_roles->get('description'),
+		'rank' => $qr_roles->get('rank'),
+		'vars' => caUnserializeForDatabase($qr_roles->get('vars'))
+	);
+}
+
+$vs_json_to_send = json_encode($va_data);
+
+// Konfigurationsdatei
+$o_sync_conf = new Configuration(dirname(__FILE__).DIRECTORY_SEPARATOR.'conf'.DIRECTORY_SEPARATOR.'sync.conf');
+$va_targets = $o_sync_conf->getList('sync_target_hostnames');
+
+// JSON an alle konfigurierten Targets senden
+foreach($va_targets as $vs_target) {
+	$vs_target_url = 'http://'.$vs_target.'/service.php/lhmMMS/RoleControlService/push';
+	$vo_handle = curl_init($vs_target_url);
+	curl_setopt($vo_handle, CURLOPT_CUSTOMREQUEST, 'GET');
+	curl_setopt($vo_handle, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($vo_handle, CURLOPT_PROXY, false); // LHM-interner traffic ohne Proxy
+	curl_setopt($vo_handle, CURLOPT_POSTFIELDS, $vs_json_to_send);
+	$vs_exec = curl_exec($vo_handle);
+	curl_close($vo_handle);
+
+	// Reporting
+	$va_return = json_decode($vs_exec, true);
+	if($va_return['ok']) {
+		CLIUtils::addMessage("Übertragung der Rollen nach {$vs_target} erfolgreich.");
+		if(isset($va_return['message']) && strlen($va_return['message'])>0) {
+			CLIUtils::addMessage("Nachricht von der Gegenseite:");
+			CLIUtils::addMessage($va_return['message']);
+		}
+	} else {
+		CLIUtils::addError("Übertragung der Rollen nach {$vs_target} fehlgeschlagen.");
+		if(is_array($va_return['errors'])) {
+			foreach($va_return['errors'] as $vs_err) {
+				CLIUtils::addError($vs_err);
+			}
+		}
+	}
+}

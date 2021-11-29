@@ -1,0 +1,29 @@
+enabled = 1
+
+# Die Server können scheinbar nur an @muenchen.de verschicken. Das hier ist also eine Liste
+# von email-adresse@muenchen.de Nutzern.
+users = [mms.kult, martin.anders, markus.loibl, raimund.beck, christian.preis, patrick.ott]
+
+# Subject line / Betreff für die Email
+subject = "MMS Datenstatistik"
+
+# "From" Adresse für die Email
+from = systeme.kult@muenchen.de
+
+# Start der Zeitspanne für relative Statistik. Wird durch PHPs strtotime() geparst:
+# 			http://www.php.net/strtotime
+# Endpunkt ist immer der Zeitpunkt der Scriptausführung (jetzt)
+start = "-1 month"
+
+# Email-Template
+#
+# Die Platzhalter für die Tabellen sind wie folgt:
+# {date_range} -- Anzeige der Anfangs- und Enddaten für den relativen Zeitrum
+# {relative_stats} und {absolute_stats} -- die jeweiligen Statistik-Tabellen
+template = "
+Relative Statistik für Zeitraum {date_range}:
+{relative_stats}
+--
+Absolute Statistik:
+{absolute_stats}
+"

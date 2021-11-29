@@ -1,0 +1,134 @@
+#!/usr/bin/env php
+<?php
+
+define("__LHM_MMS_HF_VERSION__","v0.3");
+ini_set('memory_limit', '1024M');
+
+require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'utils.php');
+
+// try and load setup.php
+if(!_caLoadSetupPHP()) {
+	die("CollectiveAccess setup.php Konfiguration konnte nicht gefunden werden! Setzen Sie die COLLECTIVEACCESS_HOME Umgebungsvariable oder führen Sie das Script aus einem Unterverzeichnis von CollectiveAccess aus.\n");
+}
+
+require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'common.php');
+require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'SanityCheck.php');
+require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'media.php');
+
+// utilities needed to parse command line options and initialize logging
+require_once(__CA_LIB_DIR__."/core/Zend/Console/Getopt.php");
+require_once(__CA_APP_DIR__."/helpers/CLIHelpers.php");
+require_once(__CA_LIB_DIR__."/ca/Utils/CLIUtils.php");
+require_once(__CA_LIB_DIR__."/core/Zend/Log.php");
+require_once(__CA_LIB_DIR__."/core/Zend/Log/Writer/Stream.php");
+require_once(__CA_LIB_DIR__."/core/Zend/Log/Writer/Syslog.php");
+require_once(__CA_LIB_DIR__."/core/Zend/Log/Formatter/Simple.php");
+
+// Konfigurationsdatei
+$o_hf_conf = new Configuration(dirname(__FILE__).DIRECTORY_SEPARATOR.'conf'.DIRECTORY_SEPARATOR.'hot_folder.conf');
+
+// set up logging
+if($vs_log_path = $o_hf_conf->get('hf_log_path')){
+	$vs_log_file = $vs_log_path.DIRECTORY_SEPARATOR.date('m-d-Y').'.log';
+	try {
+		$o_writer = new Zend_Log_Writer_Stream($vs_log_file);
+		$o_writer->setFormatter(new Zend_Log_Formatter_Simple('%timestamp% %priorityName%: %message%'.PHP_EOL));
+		$o_filter = new Zend_Log_Filter_Priority(Zend_Log::INFO);
+	} catch (Zend_Log_Exception $e) { // error while opening the file (usually permissions)
+		$o_writer = $vs_log_file = null;
+		print CLIUtils::textWithColor("Logdatei konnte nicht geöffnet werden. Protokoll erfolgt jetzt via Systemlog und kann daher NICHT vollständig per Email verschickt werden.", "bold_red").PHP_EOL.PHP_EOL;
+	}
+} else {
+	$o_writer = $vs_log_file = null;
+}
+
+// default: log everything to syslog
+if(!$o_writer) {
+	$o_writer = new Zend_Log_Writer_Syslog(array('application' => 'LHM_MMS_HotFolder', 'facility' => LOG_USER));
+	// no need for timespamps in syslog ... the syslog itsself provides that
+	$o_writer->setFormatter(new Zend_Log_Formatter_Simple('%priorityName%: %message%'.PHP_EOL));
+	$o_filter = new Zend_Log_Filter_Priority(Zend_Log::WARN);
+}
+
+// set up logger
+$g_logger = new Zend_Log($o_writer);
+$g_logger->setTimestampFormat('D Y-m-d H:i:s');
+$g_logger->addFilter($o_filter);
+
+print CLIUtils::textWithColor("LHM MMS HotFolder Processor ".__LHM_MMS_HF_VERSION__.", (c) 2014 Landeshauptstadt München", "bold_blue").PHP_EOL.PHP_EOL;
+
+/*
+ * Die eigentliche HF Logik beginnt hier
+ */
+
+$ps_base_dir = $o_hf_conf->get('hf_path');
+
+if((strlen($ps_base_dir) < 1) || !file_exists($ps_base_dir) || !is_dir($ps_base_dir) || !is_readable($ps_base_dir)) {
+	mmsHFCritErrorWithMailReport("HotFolder Basisverzeichnis existiert nicht oder ist nicht lesbar",null,$vs_log_file,$o_hf_conf);
+}
+
+// Suche Konkordanztabellen und baue Liste der Arbeitspakete
+$va_spreadsheets = array();
+
+// Das erwartete Verzeichnisformat ist <basis>/<arbeitspaket>/foo.ods
+$va_ods_files = glob($ps_base_dir.'/*/*.{ods,ODS}',GLOB_BRACE);
+	
+foreach($va_ods_files as $vs_ods) {
+	mmsLog("Konkordanztabelle gefunden: {$vs_ods}",Zend_Log::INFO);
+
+	$vs_dir = dirname($vs_ods);
+
+	if(isset($va_spreadsheets[$vs_dir])) {
+		mmsHFCritErrorWithMailReport("In Verzeichnis {$vs_dir} wurden mehrere Konkordanztabellen gefunden. Es darf pro Arbeitspaket nur eine geben. Import wird abgebrochen.",$vs_log_file,$o_hf_conf);
+	}
+
+	$va_spreadsheets[$vs_dir] = $vs_ods;
+}
+
+// Abbruch, wenn nichts gefunden => auch keine Mail
+if(!sizeof($va_spreadsheets)) {
+	print CLIUtils::textWithColor("\tKeine Konkordanztabellen gefunden. Nichts zu tun.", "bold_green")."\n\n";
+	mmsLog("Keine Konkordanztabellen gefunden. Nichts zu tun.",Zend_Log::INFO);
+	exit(0);
+}
+
+// Verarbeite Pakete -> Erst Sanity Check, dann eigentlicher Import
+$vn_exit = 0;
+global $g_media_import_base_path;
+
+mmsLog("Verarbeite Pakete ...",Zend_Log::INFO);
+
+foreach($va_spreadsheets as $vs_package_dir => $vs_package_spreadsheet) {
+
+	mmsLog("Plausibilitätscheck für Paket '{$vs_package_dir}' wird jetzt ausgeführt.",Zend_Log::INFO);
+
+	 $g_media_import_base_path = $vs_package_dir;
+
+	if(!SanityCheck::doCheck($vs_package_spreadsheet,'media')){
+		print CLIUtils::textWithColor("Konkordanztabelle {$vs_package_spreadsheet} wurde von Plausibilitätscheck zurückgewiesen. Für weitere Infos siehe Logdatei.", "red").PHP_EOL;
+		mmsLog("Plausibilitätscheck für Tabelle {$vs_package_spreadsheet} fehlgeschlagen. Paket wird zurückgewiesen.",Zend_Log::ERR);
+		unset($va_spreadsheets[$vs_package_dir]);
+		$vn_exit++;
+		continue;
+	}
+
+	mmsLog("Plausibilitätscheck für Paket '{$vs_package_dir}' scheint okay.",Zend_Log::INFO);
+	mmsLog("Import wird ausgeführt für Paket '{$vs_package_dir}'.",Zend_Log::INFO);
+
+	media_import($vs_package_spreadsheet, $vs_package_dir, false);
+
+	mmsLog("Import beendet für Paket '{$vs_package_dir}'. Verzeichnis wird jetzt entfernt!",Zend_Log::INFO);
+	print CLIUtils::textWithColor("Konkordanztabelle {$vs_package_spreadsheet} wurde abgearbeitet. Für weitere Infos siehe Logdatei.", "green").PHP_EOL;
+
+	// Entferne Paket-Verzeichnis
+	@exec("rm -rf ".escapeshellarg($vs_package_dir));
+}
+
+if($vn_exit > 0) {
+	mmsHFMailReport("Es gab fehlgeschlagene Plausibilitätschecks", $vs_log_file, $o_hf_conf);
+} else {
+	mmsHFMailReport("Fehlerfreier Durchlauf", $vs_log_file, $o_hf_conf);
+}
+
+// Return Code = Anzahl der fehlgeschlagenen Sanity Checks
+exit($vn_exit);

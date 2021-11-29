@@ -1,0 +1,48 @@
+body {
+	font-family: Helvetica, sans-serif;
+}
+
+#title {
+	font-size: 9px;
+	overflow: hidden;
+	font-weight: bold;
+
+	position: absolute;
+	width: 150px;
+	height: 35px;
+	left: 2px;
+	top: -13px;
+}
+
+#idno {
+	font-size: 11px;
+	position: absolute;
+	overflow: hidden;
+	font-weight: bold;
+	left: 2px;
+	height: 20px;
+	width: 150px;
+	top: 29px;
+}
+
+#barcode {
+	position: absolute;
+	left: -5px;
+	top: 45px;
+}
+
+#object_id {
+	position: absolute;
+	width: 50px;
+	left: 2px;
+	top: 63px;
+	font-size:8px;
+}
+
+#date {
+	position: absolute;
+	width: 50px;
+	left: 98px;
+	top: 63px;
+	font-size:8px;
+}

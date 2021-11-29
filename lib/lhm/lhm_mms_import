@@ -1,0 +1,134 @@
+#!/usr/bin/env php
+<?php
+
+define("__LHM_MMS_IMPORT_VERSION__","v0.8.3-6");
+
+ini_set('pcre.recursion_limit', '16777');
+ini_set('pcre.backtrack_limit', '10000');
+gc_disable();
+
+/**
+ * CLI Script für "dispatch" der verschiedenen Import-Aktionen, die für das LHM-MMS Projekt implementiert wurden
+ */
+
+require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'utils.php');
+
+// try and load setup.php
+if(!_caLoadSetupPHP()) {
+	die("CollectiveAccess setup.php Konfiguration konnte nicht gefunden werden! Setzen Sie die COLLECTIVEACCESS_HOME Umgebungsvariable oder führen Sie das Script aus einem Unterverzeichnis von CollectiveAccess aus.\n");
+}
+
+// load CA-dependent stuff after setup.php
+require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'common.php');
+require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'Dispatcher.php');
+
+// utilities needed to parse command line options and initialize logging
+require_once(__CA_LIB_DIR__."/core/Zend/Console/Getopt.php");
+require_once(__CA_APP_DIR__."/helpers/CLIHelpers.php");
+require_once(__CA_LIB_DIR__."/ca/Utils/CLIUtils.php");
+require_once(__CA_LIB_DIR__."/core/Zend/Log.php");
+require_once(__CA_LIB_DIR__."/core/Zend/Log/Writer/Stream.php");
+require_once(__CA_LIB_DIR__."/core/Zend/Log/Writer/Syslog.php");
+require_once(__CA_LIB_DIR__."/core/Zend/Log/Formatter/Simple.php");
+
+$g_ui_locale = __LHM_MMS_DEFAULT_LOCALE__;
+
+initializeLocale(__LHM_MMS_DEFAULT_LOCALE__);
+
+$vs_cmd = strtolower(str_replace("-", "_", $argv[1]));
+
+$va_available_cli_opts = array_merge(array(
+	"help|h-s" => "Zeigt verfügbare Befehle und zugehörige Beschreibungen an. Kann mit oder ohne spezifischen Befehl benutzt werden.",
+	"log|l-s" => "Pfad der Logdatei. Wird die Option weggelassen, erfolgt das Protokoll via Systemlog. Dort werden keine DEBUG Nachrichten ausgegeben, auch wenn das Level auf DEBUG gesetzt ist.",
+	"loglevel|d-s" => "Log level. Mögliche Werte sind: DEBUG, INFO, WARN, ERR. Standard ist WARN."
+), method_exists("Dispatcher", "{$vs_cmd}ParamList") ? call_user_func("Dispatcher::{$vs_cmd}ParamList") : array());
+
+try {
+	$o_opts = new Zend_Console_Getopt($va_available_cli_opts);
+	$o_opts->parse();
+} catch(Exception $e) {
+	die("Ungültige Optionen angegeben. Versuchen Sie 'lhm_mms_import --help' um eine Liste der verfügbaren Befehle und Parameter zu erhalten.".PHP_EOL);
+}
+
+// set up logging
+if($vs_log = $o_opts->getOption('log')){
+	// log to file
+	try {
+		$o_writer = new Zend_Log_Writer_Stream($vs_log);
+		$o_writer->setFormatter(new Zend_Log_Formatter_Simple('%timestamp% %priorityName%: %message%'.PHP_EOL));
+	} catch (Zend_Log_Exception $e) { // error while opening the file (usually permissions)
+		$o_writer = null;
+		print CLIUtils::textWithColor("Logdatei konnte nicht geöffnet werden. Protokoll erfolgt jetzt via Systemlog. Dort werden keine DEBUG Nachrichten ausgegeben, auch wenn das Level auf DEBUG gesetzt ist.", "bold_red").PHP_EOL.PHP_EOL;
+	}
+}
+
+// default: log everything to syslog
+if(!$o_writer) {
+	$o_writer = new Zend_Log_Writer_Syslog(array('application' => 'LHM_MMS_Import', 'facility' => LOG_USER));
+	// no need for timespamps in syslog ... the syslog itsself provides that
+	$o_writer->setFormatter(new Zend_Log_Formatter_Simple('%priorityName%: %message%'.PHP_EOL));
+}
+
+// was a loglevel set via command line? -> add filter to Zend logger, otherwise use WARN
+$vs_level = $o_opts->getOption('loglevel');
+switch($vs_level) {
+	case 'ERR':
+		$o_filter = new Zend_Log_Filter_Priority(Zend_Log::ERR);
+		break;
+	case 'DEBUG':
+		$o_filter = new Zend_Log_Filter_Priority(Zend_Log::DEBUG);
+		break;
+	case 'INFO':
+		$o_filter = new Zend_Log_Filter_Priority(Zend_Log::INFO);
+		break;
+	case 'WARN':
+	default:
+		$o_filter = new Zend_Log_Filter_Priority(Zend_Log::WARN);
+		break;
+}
+
+// set up global logger. can be using by importing 'global $g_logger' anywhere
+$g_logger = new Zend_Log($o_writer);
+$g_logger->setTimestampFormat('D Y-m-d H:i:s');
+$g_logger->addFilter($o_filter);
+
+print CLIUtils::textWithColor("LHM MMS Import Suite ".__LHM_MMS_IMPORT_VERSION__.", (c) 2013-2015 Landeshauptstadt München", "bold_blue").PHP_EOL.PHP_EOL;
+
+// --help (-h)
+if($o_opts->getOption('help')){
+	if(method_exists("Dispatcher", "{$vs_cmd}Help")) { // command-specific help
+		print CLIUtils::textWithColor("Description for \"{$vs_cmd}\":", "bold_green")."\n\n";
+		print "\t".wordwrap(call_user_func_array("Dispatcher::{$vs_cmd}Help", array($o_opts)), 90, "\n\t").PHP_EOL.PHP_EOL;
+
+		if (is_array($va_available_cli_opts) && sizeof($va_available_cli_opts)) {
+			print CLIUtils::textWithColor("Options for {$vs_cmd} are:", "bold_green")."\n\n";
+			foreach($va_available_cli_opts as $vs_opt_format => $vs_opt_desc) {
+				$va_tmp = explode("|", $vs_opt_format);
+				$va_abbr = preg_split("![=\-]+!", $va_tmp[1]);
+
+				print "\t".CLIUtils::textWithColor(str_pad("--".$va_tmp[0]." ".($va_abbr[0] ? "(-{$va_abbr[0]})" : ""), 20), "red").wordwrap($vs_opt_desc, 75, "\n\t".str_repeat(" ", 20))."\n\n";
+			}
+		}
+	} else { // generic help
+		$va_methods = get_class_methods("Dispatcher");
+
+		foreach($va_methods as $vs_method) {
+			if(preg_match("!Help$!", $vs_method)) { continue; }
+			if(preg_match("!ParamList$!", $vs_method)) { continue; }
+			print "\t".CLIUtils::textWithColor(str_pad(str_replace("_", "-", $vs_method), 30), "red")."\t".wordwrap(call_user_func("Dispatcher::{$vs_method}Help"), 75, "\n\t".str_repeat(" ", 30)."\t")."\n\n";
+		}
+	}
+
+	exit(0);
+}
+
+// execute command
+if (method_exists("Dispatcher", $vs_cmd)) {
+	call_user_func_array("Dispatcher::{$vs_cmd}", array($o_opts));
+	exit(0);
+}
+
+// nothing specified, print generic "catch" message
+print CLIUtils::textWithColor("\tKein Befehl angegeben. Versuchen Sie 'lhm_mms_import --help' um eine Liste der verfügbaren Befehle und Parameter zu erhalten.", "bold_red")."\n\n";
+
+exit(0);
