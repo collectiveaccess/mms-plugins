@@ -310,12 +310,8 @@ class AdminToolsController extends ActionController {
 		$this->render('data_stats_html.php');
 	}
 	# -------------------------------------------------------
-	private static function getDirSize($ps_dir) {
-		$io = popen( '/usr/bin/du -sk ' . $ps_dir, 'r' );
-		$size = fgets ( $io, 4096);
-		$size = substr ( $size, 0, strpos ( $size, "\t" ) );
-		pclose ( $io );
-		return (int) $size * 1024;
+	private static function getDirSize($dir) {
+		return caDirectorySize($dir);
 	}
 	# -------------------------------------------------------
 	/**
