@@ -19,7 +19,7 @@
 		<div id="wrapper">
 			<div id='title'><?php print $t_object->getLabelForDisplay(); ?></div>
 			<div id='idno'><?php print $t_object->get('idno'); ?></div>
-			<div id='barcode'><img width="110" height="32" src='<?php print $vs_barcode_file; ?>'/></div>
+			<div id='barcode'><?= $vs_barcode_file; ?></div>
 			
 			<div id='object_id'><?php print $t_object->getPrimaryKey(); ?></div>
 			<div id='date'><?php print date("d.m.Y"); ?></div>

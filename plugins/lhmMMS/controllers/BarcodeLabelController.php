@@ -11,8 +11,6 @@ use Dompdf\Adapter\CPDF;
 use Dompdf\Dompdf;
 use Dompdf\Exception;
 
-#require_once(__CA_LIB_DIR__.'/Plugins/PDFRenderer/dompdf.php');
-require_once(__CA_LIB_DIR__.'/Print/Barcode.php');
 
 class BarcodeLabelController extends ActionController {
 	#
@@ -41,13 +39,11 @@ class BarcodeLabelController extends ActionController {
 		}
 
 		// generate Barcode
-		$o_barcode = new Barcode();
-		$vs_tmp = tempnam(caGetTempDirPath(), 'mmsBarCode');
-		$o_barcode->draw("{$vn_object_id}", "{$vs_tmp}.png", 'code128', 'png', 12);
+		$bc = caGenerateBarcode("{$vn_object_id}", ['type' => 'code128', 'height' => '16px']);
 
 		$va_page_dimensions = array(0,0,4.0*28.346,7.0*28.346);
 
-		$this->getView()->setVar('barcode_file', "{$vs_tmp}.png");
+		$this->getView()->setVar('barcode_file', $bc);
 		$this->getView()->setVar('t_object',$t_object);
 
 		$vs_content = $this->render('barcode_pdf_html.php');
