@@ -1,6 +1,6 @@
 <?php
 
-require_once(__CA_LIB_DIR__.'/ca/ApplicationPluginManager.php');
+require_once(__CA_LIB_DIR__.'/ApplicationPluginManager.php');
 
 # ---------------------------------------------------------------------
 /**
