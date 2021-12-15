@@ -54,6 +54,7 @@ class MMSInsuranceFeatures {
 			// Wir nehmen nur den neuesten her. Dieser lässt sich einfach finden, indem man nach PK sortiert
 			$t_object->load($va_object_info['object_id']);
 			$va_values = $t_object->get('ca_objects.insurance_value_current.current_value_eur', ['returnAsArray' => true]);
+			print_R($va_values);
 			if (!is_array($va_values)) { continue; }
 		
 			ksort($va_values); // sortiere nach Primärschlüssel der Werte
@@ -61,8 +62,6 @@ class MMSInsuranceFeatures {
 
 			$vn_insurance_sum += mmsExtractFloatFromCurrencyValue($vs_val);
 		}
-
-		$t_loan->setMode(ACCESS_WRITE);
 
 		// editiere den existierenden automatisch gesetzten Wert oder lege einen neuen an
 		$t_loan->replaceAttribute(array(
