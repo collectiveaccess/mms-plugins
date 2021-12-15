@@ -1,6 +1,6 @@
 <?php
 /** ---------------------------------------------------------------------
- * app/lib/ca/BaseApplicationTool.php : 
+ * 
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
