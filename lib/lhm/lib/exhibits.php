@@ -35,7 +35,7 @@ function exhibit_import($ps_xlsx) {
 		$t_occ->setMode(ACCESS_WRITE);
 
 		// Ausstellungs ID
-		$vs_exhibit_idno = trim((string)$o_sheet->getCellByColumnAndRow(0, $vn_row_num));
+		$vs_exhibit_idno = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
 
 		if(strlen($vs_exhibit_idno)<1) {
 			mmsLog("Ausstellungen [{$ps_xlsx}]: Die Ausstellungs_ID ist leer für Zeile {$vn_row_num}. Die gesamte Zeile wurde ignoriert.", Zend_Log::WARN);
@@ -56,7 +56,7 @@ function exhibit_import($ps_xlsx) {
 		$t_occ->set('type_id','exhibition');
 
 		// Ausstellungstyp
-		$vs_type = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
+		$vs_type = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
 		$vs_type = mmsGetListItemIDByLabel('exhibition_type_list',$vs_type,'intern');
 
 		$t_occ->addAttribute(array(
@@ -64,7 +64,7 @@ function exhibit_import($ps_xlsx) {
 		),'exhibition_type');
 
 		// Ausstellungsdauer
-		$vs_duration = mmsGetDateTimeColumnFromSheet($o_sheet, 3, $vn_row_num);
+		$vs_duration = mmsGetDateTimeColumnFromSheet($o_sheet, 4, $vn_row_num);
 
 		if(strlen($vs_duration) > 0) {
 			if(!$o_tep->parse($vs_duration)) {
@@ -79,42 +79,42 @@ function exhibit_import($ps_xlsx) {
 
 		// Viele Textfelder
 
-		$vs_place = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
+		$vs_place = trim((string)$o_sheet->getCellByColumnAndRow(5, $vn_row_num));
 		if(strlen($vs_place)>0){
 			$t_occ->addAttribute(array(
 				'exhibition_place' => $vs_place,
 			),'exhibition_place');
 		}
 
-		$vs_institution = trim((string)$o_sheet->getCellByColumnAndRow(5, $vn_row_num));
+		$vs_institution = trim((string)$o_sheet->getCellByColumnAndRow(6, $vn_row_num));
 		if(strlen($vs_institution)>0){
 			$t_occ->addAttribute(array(
 				'exhibition_institution' => $vs_institution,
 			),'exhibition_institution');
 		}
 
-		$vs_add_places = trim((string)$o_sheet->getCellByColumnAndRow(6, $vn_row_num));
+		$vs_add_places = trim((string)$o_sheet->getCellByColumnAndRow(7, $vn_row_num));
 		if(strlen($vs_add_places)>0){
 			$t_occ->addAttribute(array(
 				'exhibition_additonal_places' => $vs_add_places,
 			),'exhibition_additonal_places');
 		}
 
-		$vs_curator = trim((string)$o_sheet->getCellByColumnAndRow(7, $vn_row_num));
+		$vs_curator = trim((string)$o_sheet->getCellByColumnAndRow(8, $vn_row_num));
 		if(strlen($vs_curator)>0){
 			$t_occ->addAttribute(array(
 				'exhibition_curator' => $vs_curator,
 			),'exhibition_curator');
 		}
 
-		$vs_catalogue = trim((string)$o_sheet->getCellByColumnAndRow(8, $vn_row_num));
+		$vs_catalogue = trim((string)$o_sheet->getCellByColumnAndRow(9, $vn_row_num));
 		if(strlen($vs_catalogue)>0){
 			$t_occ->addAttribute(array(
 				'exhibition_catalogue' => $vs_catalogue,
 			),'exhibition_catalogue');
 		}
 
-		$vs_remark = trim((string)$o_sheet->getCellByColumnAndRow(9, $vn_row_num));
+		$vs_remark = trim((string)$o_sheet->getCellByColumnAndRow(10, $vn_row_num));
 		if(strlen($vs_remark)>0){
 			$t_occ->addAttribute(array(
 				'remark' => $vs_remark,
@@ -132,7 +132,7 @@ function exhibit_import($ps_xlsx) {
 		}
 
 		// labels
-		$vs_name = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
+		$vs_name = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
 
 		if(strlen($vs_name)<1){
 			$vs_name = "[LEER]";

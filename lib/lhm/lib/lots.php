@@ -35,7 +35,7 @@ function lots_import($ps_xlsx) {
 		$t_lot->setMode(ACCESS_WRITE);
 
 		// Erwerbung ID
-		$vs_lot_id = trim((string)$o_sheet->getCellByColumnAndRow(0, $vn_row_num));
+		$vs_lot_id = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
 
 		if(strlen($vs_lot_id)>0){
 			$vn_lot_id = intval($vs_lot_id);
@@ -57,21 +57,21 @@ function lots_import($ps_xlsx) {
 		}
 
 		// Inventarnummernstamm
-		$vs_lot_idno = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
+		$vs_lot_idno = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
 		if(strlen($vs_lot_idno)>0){
 			$t_lot->set('idno_stub',$vs_lot_idno);
 		}
 
 		// Erwerbungsart
-		$vs_lot_type = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
+		$vs_lot_type = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
 		$t_lot->set('type_id', mmsGetListItemIDByLabel('object_lot_types',$vs_lot_type,'undefined'));
 
 		// Erwerbungsstatus
-		$vs_lot_status = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
+		$vs_lot_status = trim((string)$o_sheet->getCellByColumnAndRow(5, $vn_row_num));
 		$t_lot->set('lot_status_id', mmsGetListItemIDByLabel('object_lot_statuses',$vs_lot_status,'laufende_erwerbung'));
 
 		// Erwerbungsdatum
-		$vs_acq_date = mmsGetDateTimeColumnFromSheet($o_sheet, 5, $vn_row_num);
+		$vs_acq_date = mmsGetDateTimeColumnFromSheet($o_sheet, 6, $vn_row_num);
 		if(strlen($vs_acq_date)>0){
 			if($o_tep->parse($vs_acq_date)) {
 				$t_lot->addAttribute(array(
@@ -83,7 +83,7 @@ function lots_import($ps_xlsx) {
 		}
 
 		// Erworben von
-		$vs_acq_prev_owner = trim((string)$o_sheet->getCellByColumnAndRow(6, $vn_row_num));
+		$vs_acq_prev_owner = trim((string)$o_sheet->getCellByColumnAndRow(7, $vn_row_num));
 		if(strlen($vs_acq_prev_owner)>0){
 			$t_lot->addAttribute(array(
 				'acquisition_previous_owner' => $vs_acq_prev_owner,
@@ -91,7 +91,7 @@ function lots_import($ps_xlsx) {
 		}
 
 		// Erwerbung Bemerkung
-		$vs_remark = trim((string)$o_sheet->getCellByColumnAndRow(7, $vn_row_num));
+		$vs_remark = trim((string)$o_sheet->getCellByColumnAndRow(8, $vn_row_num));
 		if(strlen($vs_remark)>0){
 			$t_lot->addAttribute(array(
 				'remark' => $vs_remark,
@@ -99,8 +99,8 @@ function lots_import($ps_xlsx) {
 		}
 
 		// Ankaufspreis
-		$vs_value_org = trim((string)$o_sheet->getCellByColumnAndRow(8, $vn_row_num));
-		$vs_value_eur = trim((string)$o_sheet->getCellByColumnAndRow(9, $vn_row_num));
+		$vs_value_org = trim((string)$o_sheet->getCellByColumnAndRow(9, $vn_row_num));
+		$vs_value_eur = trim((string)$o_sheet->getCellByColumnAndRow(10, $vn_row_num));
 		if(strlen($vs_value_org)> 0 || strlen($vs_value_eur)>0) {
 			$t_lot->addAttribute(array(
 				'value_original' => $vs_value_org,
@@ -109,8 +109,8 @@ function lots_import($ps_xlsx) {
 		}
 
 		// Nebenkosten
-		$vs_costs_additional_eur = trim((string)$o_sheet->getCellByColumnAndRow(10, $vn_row_num));
-		$vs_costs_additional_comment = trim((string)$o_sheet->getCellByColumnAndRow(11, $vn_row_num));
+		$vs_costs_additional_eur = trim((string)$o_sheet->getCellByColumnAndRow(11, $vn_row_num));
+		$vs_costs_additional_comment = trim((string)$o_sheet->getCellByColumnAndRow(12, $vn_row_num));
 		if(strlen($vs_costs_additional_eur)> 0 || strlen($vs_costs_additional_comment)>0) {
 			$t_lot->addAttribute(array(
 				'costs_additional_comment' => $vs_costs_additional_comment,
@@ -119,8 +119,8 @@ function lots_import($ps_xlsx) {
 		}
 
 		// SAP
-		$vs_sap_accounting_area = trim((string)$o_sheet->getCellByColumnAndRow(12, $vn_row_num));
-		$vs_sap_asset_aggr_nr = trim((string)$o_sheet->getCellByColumnAndRow(13, $vn_row_num));
+		$vs_sap_accounting_area = trim((string)$o_sheet->getCellByColumnAndRow(13, $vn_row_num));
+		$vs_sap_asset_aggr_nr = trim((string)$o_sheet->getCellByColumnAndRow(14, $vn_row_num));
 		if(strlen($vs_sap_accounting_area)> 0 || strlen($vs_sap_asset_aggr_nr)>0) {
 			$t_lot->addAttribute(array(
 				'sap_asset_aggr_nr' => $vs_sap_asset_aggr_nr,
@@ -129,7 +129,7 @@ function lots_import($ps_xlsx) {
 		}
 
 		// Haushaltsstatus
-		$vs_accounting_state = trim((string)$o_sheet->getCellByColumnAndRow(14, $vn_row_num));
+		$vs_accounting_state = trim((string)$o_sheet->getCellByColumnAndRow(15, $vn_row_num));
 		if((strlen($vs_accounting_state)>0) && (strtolower($vs_accounting_state) == "x")) {
 			$t_lot->addAttribute(array(
 				'accounting_state' => 'yes'
@@ -151,7 +151,7 @@ function lots_import($ps_xlsx) {
 		}
 
 		// after insert
-		$vs_lot_label = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
+		$vs_lot_label = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
 
 		if(strlen($vs_lot_label)<1){
 			$vs_lot_label = "[LEER]";

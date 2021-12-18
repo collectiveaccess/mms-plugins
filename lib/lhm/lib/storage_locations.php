@@ -34,10 +34,10 @@ function do_storage_location_import($ps_xlsx) {
 
 		// sicherstellen, dass keine Hierarchie-beziehungen aus dem letzten loop mitgeschleppt werden
 		$pn_parent_id = null;
-		$vn_col = 1;
+		$vn_col = 2;
 		$va_idno_parts = array();
 
-		while($vn_col <= 15) {
+		while($vn_col <= 16) {
 
 			$vs_aktuelle_ebene = $o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num)->getFormattedValue();
 
@@ -53,7 +53,7 @@ function do_storage_location_import($ps_xlsx) {
 
 			}
 
-			if($vn_col < 15) { // NACH dem letzten Label (in Spalten-ID 15) kommt kein Delimiter mehr
+			if($vn_col < 16) { // NACH dem letzten Label (in Spalten-ID 15) kommt kein Delimiter mehr
 				$vs_delimiter = $o_sheet->getCellByColumnAndRow($vn_col+1, $vn_row_num)->getFormattedValue();
 				if(strlen($vs_delimiter)>0) {
 					$va_idno_parts[] = $vs_delimiter;
@@ -66,13 +66,12 @@ function do_storage_location_import($ps_xlsx) {
 		// Die Daten aus den nicht ebenen-spezifischen Spalten gelten für die letzten Ebene ($pn_parent_id bei Exit der Schleife)
 		$t_loc = new ca_storage_locations($pn_parent_id);
 		$t_loc->setTransaction($o_trans);
-		$t_loc->setMode(ACCESS_WRITE);
 
-		$vs_user_idno = trim($o_sheet->getCellByColumnAndRow(0, $vn_row_num)->getCalculatedValue());
+		$vs_user_idno = trim($o_sheet->getCellByColumnAndRow(1, $vn_row_num)->getCalculatedValue());
 		$t_loc->set('idno',$vs_user_idno);
 
 		// Bemerkung
-		$vs_bemerkung = trim((string)$o_sheet->getCellByColumnAndRow(16, $vn_row_num));
+		$vs_bemerkung = trim((string)$o_sheet->getCellByColumnAndRow(17, $vn_row_num));
 		if(strlen($vs_bemerkung)>0){
 			$t_loc->addAttribute(array(
 				'remark' => $vs_bemerkung,
@@ -80,7 +79,7 @@ function do_storage_location_import($ps_xlsx) {
 		}
 
 		// Beschreibung
-		$vs_beschreibung = trim((string)$o_sheet->getCellByColumnAndRow(17, $vn_row_num));
+		$vs_beschreibung = trim((string)$o_sheet->getCellByColumnAndRow(18, $vn_row_num));
 		if(strlen($vs_beschreibung)>0){
 			$t_loc->addAttribute(array(
 				'description' => $vs_beschreibung,

@@ -31,10 +31,9 @@ function object_group_import($ps_xlsx) {
 		$o_trans = new Transaction();
 		$t_occ = new ca_occurrences();
 		$t_occ->setTransaction($o_trans);
-		$t_occ->setMode(ACCESS_WRITE);
 
 		// Objektgruppe/Konvolut ID ID
-		$vs_idno = trim((string)$o_sheet->getCellByColumnAndRow(0, $vn_row_num));
+		$vs_idno = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
 
 		if(strlen($vs_idno)<1) {
 			mmsLog("Objektgruppen/Konvolute [{$ps_xlsx}]: Die Objektgruppe/Konvolut ID ist leer für Zeile {$vn_row_num}. Die gesamte Zeile wurde ignoriert.", Zend_Log::WARN);
@@ -54,7 +53,7 @@ function object_group_import($ps_xlsx) {
 		$t_occ->set('status',1);
 
 		// Type ID
-		$vs_type = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
+		$vs_type = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
 
 		if(!in_array(strtolower($vs_type), array('o','k'))){
 			mmsLog("Objektgruppen/Konvolute [{$ps_xlsx}]: Der Ausstellungstyp ist nicht gültig für Zeile {$vn_row_num}. Der Wert ist '$vs_type'. Die gesamte Zeile wurde ignoriert.", Zend_Log::WARN);
@@ -76,7 +75,7 @@ function object_group_import($ps_xlsx) {
 		$t_occ->set('type_id',$vs_type_id);
 
 		// Beschreibung
-		$vs_desc = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
+		$vs_desc = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
 
 		if(strlen($vs_desc) > 0) {
 			$t_occ->addAttribute(array(
@@ -95,7 +94,7 @@ function object_group_import($ps_xlsx) {
 		}
 
 		// labels
-		$vs_name = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
+		$vs_name = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
 
 		if(strlen($vs_name)<1){
 			$vs_name = "[LEER]";

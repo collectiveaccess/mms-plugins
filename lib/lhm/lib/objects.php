@@ -35,7 +35,7 @@ function objects_import($ps_xlsx){
 		$vn_row_num = $o_row->getRowIndex();
 		if($vn_row_num == 1) continue; // headers
 
-		$vs_object_id = trim((string)$o_sheet->getCellByColumnAndRow(0, $vn_row_num));
+		$vs_object_id = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
 
 		// increment before 1st possible continuation point
 		print CLIProgressBar::next();
@@ -68,7 +68,6 @@ function objects_import($ps_xlsx){
 
 		$t_object = new ca_objects();
 		$t_object->setTransaction($o_trans);
-		$t_object->setMode(ACCESS_WRITE);
 		$t_object->set('access',0);
 		$t_object->set('status',1);
 		$t_object->set('type_id','object');
@@ -76,14 +75,14 @@ function objects_import($ps_xlsx){
 		$t_object->set('acl_inherit_from_parent', 0);
 
 		// Inventarnummer
-		$vs_idno = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
+		$vs_idno = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
 		if(strlen($vs_idno)>0){
 			$t_object->set('idno',$vs_idno);
 		}
 
 		// Ort Text und GeoNames
-		$vs_ort_text = trim((string)$o_sheet->getCellByColumnAndRow(12, $vn_row_num));
-		$vs_ort_gn = trim((string)$o_sheet->getCellByColumnAndRow(13, $vn_row_num));
+		$vs_ort_text = trim((string)$o_sheet->getCellByColumnAndRow(13, $vn_row_num));
+		$vs_ort_gn = trim((string)$o_sheet->getCellByColumnAndRow(14, $vn_row_num));
 
 		if(strlen($vs_ort_text)>0 || strlen($vs_ort_gn)>0) { // Container wird gesetzt, wenn eins von beidem gesetzt ist!
 			// Lookup Ort in GeoNames und baue String
@@ -103,9 +102,9 @@ function objects_import($ps_xlsx){
 		}
 
 		// Datierung rechnerisch und Freitext, mit Typ
-		$vs_date_text = trim((string)$o_sheet->getCellByColumnAndRow(14, $vn_row_num));
-		$vs_date_calc = mmsGetDateTimeColumnFromSheet($o_sheet,15,$vn_row_num);
-		$vs_date_type = trim((string)$o_sheet->getCellByColumnAndRow(16, $vn_row_num));
+		$vs_date_text = trim((string)$o_sheet->getCellByColumnAndRow(15, $vn_row_num));
+		$vs_date_calc = mmsGetDateTimeColumnFromSheet($o_sheet,16,$vn_row_num);
+		$vs_date_type = trim((string)$o_sheet->getCellByColumnAndRow(17, $vn_row_num));
 		if(strlen($vs_date_text)>0 || strlen($vs_date_calc)>0) { // Container wird gesetzt, wenn eins von beidem gesetzt ist!
 
 			if(strlen($vs_date_calc)>0){
@@ -128,7 +127,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Objektart
-		$vs_objektart = trim((string)$o_sheet->getCellByColumnAndRow(17, $vn_row_num));
+		$vs_objektart = trim((string)$o_sheet->getCellByColumnAndRow(18, $vn_row_num));
 		if(strlen($vs_objektart)>0) {
 			$t_object->addAttribute(array(
 				'object_type_text' => $vs_objektart,
@@ -136,7 +135,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Material/Technik
-		$vs_material_technique = trim((string)$o_sheet->getCellByColumnAndRow(18, $vn_row_num));
+		$vs_material_technique = trim((string)$o_sheet->getCellByColumnAndRow(19, $vn_row_num));
 		if(strlen($vs_material_technique)>0) {
 			$t_object->addAttribute(array(
 				'material_technique' => $vs_material_technique,
@@ -144,12 +143,12 @@ function objects_import($ps_xlsx){
 		}
 
 		// Maße
-		$vs_dimensions_text = trim((string)$o_sheet->getCellByColumnAndRow(19, $vn_row_num));
-		$vs_dimensions_h = trim((string)$o_sheet->getCellByColumnAndRow(20, $vn_row_num));
-		$vs_dimensions_b = trim((string)$o_sheet->getCellByColumnAndRow(21, $vn_row_num));
-		$vs_dimensions_t = trim((string)$o_sheet->getCellByColumnAndRow(22, $vn_row_num));
-		$vs_dimensions_type = trim((string)$o_sheet->getCellByColumnAndRow(23, $vn_row_num));
-		$vs_dimensions_geprueft = trim((string)$o_sheet->getCellByColumnAndRow(24, $vn_row_num));
+		$vs_dimensions_text = trim((string)$o_sheet->getCellByColumnAndRow(20, $vn_row_num));
+		$vs_dimensions_h = trim((string)$o_sheet->getCellByColumnAndRow(21, $vn_row_num));
+		$vs_dimensions_b = trim((string)$o_sheet->getCellByColumnAndRow(22, $vn_row_num));
+		$vs_dimensions_t = trim((string)$o_sheet->getCellByColumnAndRow(23, $vn_row_num));
+		$vs_dimensions_type = trim((string)$o_sheet->getCellByColumnAndRow(24, $vn_row_num));
+		$vs_dimensions_geprueft = trim((string)$o_sheet->getCellByColumnAndRow(25, $vn_row_num));
 
 		if(
 			strlen($vs_dimensions_text)>0 ||
@@ -181,7 +180,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Rahmung
-		$vs_rahmung = trim((string)$o_sheet->getCellByColumnAndRow(25, $vn_row_num));
+		$vs_rahmung = trim((string)$o_sheet->getCellByColumnAndRow(26, $vn_row_num));
 		if(strlen($vs_rahmung)>0) {
 			$t_object->addAttribute(array(
 				'framing' => $vs_rahmung,
@@ -189,7 +188,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Signatur/Beschriftung
-		$vs_inscription = trim((string)$o_sheet->getCellByColumnAndRow(26, $vn_row_num));
+		$vs_inscription = trim((string)$o_sheet->getCellByColumnAndRow(27, $vn_row_num));
 		if(strlen($vs_inscription)>0) {
 			$t_object->addAttribute(array(
 				'inscription' => $vs_inscription,
@@ -197,7 +196,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Beschreibung
-		$vs_description = trim((string)$o_sheet->getCellByColumnAndRow(27, $vn_row_num));
+		$vs_description = trim((string)$o_sheet->getCellByColumnAndRow(28, $vn_row_num));
 		if(strlen($vs_description)>0) {
 			$t_object->addAttribute(array(
 				'add_information_object_text' => $vs_description,
@@ -206,7 +205,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Sonstige Angaben
-		$vs_sonst_angaben = trim((string)$o_sheet->getCellByColumnAndRow(28, $vn_row_num));
+		$vs_sonst_angaben = trim((string)$o_sheet->getCellByColumnAndRow(29, $vn_row_num));
 		if(strlen($vs_sonst_angaben)>0) {
 			$t_object->addAttribute(array(
 				'add_information_object_text' => $vs_sonst_angaben,
@@ -215,8 +214,8 @@ function objects_import($ps_xlsx){
 		}
 
 		// WIO bestimmt
-		$vs_wio_text = trim((string)$o_sheet->getCellByColumnAndRow(29, $vn_row_num));
-		$vs_wio_type = trim((string)$o_sheet->getCellByColumnAndRow(30, $vn_row_num));
+		$vs_wio_text = trim((string)$o_sheet->getCellByColumnAndRow(30, $vn_row_num));
+		$vs_wio_type = trim((string)$o_sheet->getCellByColumnAndRow(31, $vn_row_num));
 		if(strlen($vs_wio_text)>0 && strlen($vs_wio_type)>0) {
 
 			if($vs_wio_type_code = $t_list->getItemIDFromListByLabel('add_information_object_list', $vs_wio_type)) {
@@ -232,7 +231,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Provenienz
-		$vs_provenance = trim((string)$o_sheet->getCellByColumnAndRow(31, $vn_row_num));
+		$vs_provenance = trim((string)$o_sheet->getCellByColumnAndRow(32, $vn_row_num));
 		if(strlen($vs_provenance)>0) {
 			$t_object->addAttribute(array(
 				'provenance_previous_owner' => $vs_provenance,
@@ -240,7 +239,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Kulturgutschutzliste
-		$vs_cultural_artifact_list = trim((string)$o_sheet->getCellByColumnAndRow(32, $vn_row_num));
+		$vs_cultural_artifact_list = trim((string)$o_sheet->getCellByColumnAndRow(33, $vn_row_num));
 		if((strlen($vs_cultural_artifact_list)>0) && (strtolower($vs_cultural_artifact_list)=="x")) {
 			$t_object->addAttribute(array(
 				'cultural_artifact' => 'yes',
@@ -252,7 +251,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Erwerbungen (nur noch via lot_id! Yay!)
-		$vs_erwerbung_id = trim((string)$o_sheet->getCellByColumnAndRow(33, $vn_row_num));
+		$vs_erwerbung_id = trim((string)$o_sheet->getCellByColumnAndRow(34, $vn_row_num));
 		if(strlen($vs_erwerbung_id)>0) {
 			if($t_lot->load($vs_erwerbung_id)){
 				$t_object->set('lot_id',$t_lot->getPrimaryKey());
@@ -262,7 +261,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Leihgeber
-		$vs_leihgeber = trim((string)$o_sheet->getCellByColumnAndRow(34, $vn_row_num));
+		$vs_leihgeber = trim((string)$o_sheet->getCellByColumnAndRow(35, $vn_row_num));
 		if(strlen($vs_leihgeber)>0) {
 			$t_object->addAttribute(array(
 				'lender_owner' => $vs_leihgeber,
@@ -270,8 +269,8 @@ function objects_import($ps_xlsx){
 		}
 
 		// Kosten / Wert des Objekts
-		$vs_kosten_org = trim((string)$o_sheet->getCellByColumnAndRow(35, $vn_row_num));
-		$vs_kosten_eur = trim((string)$o_sheet->getCellByColumnAndRow(36, $vn_row_num));
+		$vs_kosten_org = trim((string)$o_sheet->getCellByColumnAndRow(36, $vn_row_num));
+		$vs_kosten_eur = trim((string)$o_sheet->getCellByColumnAndRow(37, $vn_row_num));
 		if(strlen($vs_kosten_org)>0 || strlen($vs_kosten_eur)>0) {
 
 			if(strlen($vs_kosten_eur)>0) {
@@ -290,8 +289,8 @@ function objects_import($ps_xlsx){
 		}
 
 		// Nebenkosten
-		$vs_nk_eur = trim((string)$o_sheet->getCellByColumnAndRow(37, $vn_row_num));
-		$vs_nk_bemerkung = trim((string)$o_sheet->getCellByColumnAndRow(38, $vn_row_num));
+		$vs_nk_eur = trim((string)$o_sheet->getCellByColumnAndRow(38, $vn_row_num));
+		$vs_nk_bemerkung = trim((string)$o_sheet->getCellByColumnAndRow(39, $vn_row_num));
 		if(strlen($vs_nk_bemerkung)>0 || strlen($vs_nk_eur)>0) {
 
 			if(strlen($vs_nk_eur)>0) {
@@ -310,8 +309,8 @@ function objects_import($ps_xlsx){
 		}
 
 		// Versicherungswert historisch
-		$vs_vw_eur = trim((string)$o_sheet->getCellByColumnAndRow(39, $vn_row_num));
-		$vs_vw_date = trim((string)$o_sheet->getCellByColumnAndRow(40, $vn_row_num));
+		$vs_vw_eur = trim((string)$o_sheet->getCellByColumnAndRow(40, $vn_row_num));
+		$vs_vw_date = trim((string)$o_sheet->getCellByColumnAndRow(41, $vn_row_num));
 		if(strlen($vs_vw_eur)>0 || strlen($vs_vw_date)>0) {
 			$va_tmp_eur = explode(';',$vs_vw_eur);
 			$va_tmp_date = explode(';', $vs_vw_date);
@@ -353,7 +352,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Literatur
-		$vs_literature = trim((string)$o_sheet->getCellByColumnAndRow(41, $vn_row_num));
+		$vs_literature = trim((string)$o_sheet->getCellByColumnAndRow(42, $vn_row_num));
 		if(strlen($vs_literature)>0) {
 			$t_object->addAttribute(array(
 				'literature' => $vs_literature,
@@ -361,8 +360,8 @@ function objects_import($ps_xlsx){
 		}
 
 		// Inventarnummer Alt
-		$vs_inv_nr_alt_nr = trim((string)$o_sheet->getCellByColumnAndRow(42, $vn_row_num));
-		$vs_inv_nr_alt_type = trim((string)$o_sheet->getCellByColumnAndRow(43, $vn_row_num));
+		$vs_inv_nr_alt_nr = trim((string)$o_sheet->getCellByColumnAndRow(43, $vn_row_num));
+		$vs_inv_nr_alt_type = trim((string)$o_sheet->getCellByColumnAndRow(44, $vn_row_num));
 		if(strlen($vs_inv_nr_alt_nr)>0 || strlen($vs_inv_nr_alt_type)>0) {
 			$va_tmp_nr = explode(';',$vs_inv_nr_alt_nr);
 			$va_tmp_type = explode(';', $vs_inv_nr_alt_type);
@@ -380,7 +379,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Inventarisierung Kommentar
-		$vs_inv_comment = trim((string)$o_sheet->getCellByColumnAndRow(44, $vn_row_num));
+		$vs_inv_comment = trim((string)$o_sheet->getCellByColumnAndRow(45, $vn_row_num));
 		if(strlen($vs_inv_comment)>0) {
 			$t_object->addAttribute(array(
 				'inventory_comment' => $vs_inv_comment,
@@ -388,7 +387,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Copyright Info
-		$vs_creditline = trim((string)$o_sheet->getCellByColumnAndRow(45, $vn_row_num));
+		$vs_creditline = trim((string)$o_sheet->getCellByColumnAndRow(46, $vn_row_num));
 		if(strlen($vs_creditline)>0) {
 			$t_object->addAttribute(array(
 				'copyright_information' => $vs_creditline,
@@ -396,7 +395,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// ToDo Inventarisierung
-		$vs_todo_inv = trim((string)$o_sheet->getCellByColumnAndRow(48, $vn_row_num));
+		$vs_todo_inv = trim((string)$o_sheet->getCellByColumnAndRow(49, $vn_row_num));
 		if(strlen($vs_todo_inv)>0){
 			$t_object->addAttribute(array(
 				'todo_inventory_description' => $vs_todo_inv,
@@ -405,9 +404,9 @@ function objects_import($ps_xlsx){
 
 		// Datenquelle
 		$va_data_source = array();
-		$vs_data_source = trim((string)$o_sheet->getCellByColumnAndRow(49, $vn_row_num));
-		$vs_bearbeitet_von = trim((string)$o_sheet->getCellByColumnAndRow(50, $vn_row_num));
-		$vs_bearbeitet_am = mmsGetDateTimeColumnFromSheet($o_sheet,51,$vn_row_num);
+		$vs_data_source = trim((string)$o_sheet->getCellByColumnAndRow(50, $vn_row_num));
+		$vs_bearbeitet_von = trim((string)$o_sheet->getCellByColumnAndRow(51, $vn_row_num));
+		$vs_bearbeitet_am = mmsGetDateTimeColumnFromSheet($o_sheet,52,$vn_row_num);
 
 		if(strlen($vs_data_source)>0){
 			$va_data_source[] = "Quelle: ".$vs_data_source;
@@ -428,7 +427,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// ToDo Datensatz
-		$vs_todo_datensatz = trim((string)$o_sheet->getCellByColumnAndRow(53, $vn_row_num));
+		$vs_todo_datensatz = trim((string)$o_sheet->getCellByColumnAndRow(54, $vn_row_num));
 		if(strlen($vs_todo_datensatz)>0){
 			$t_object->addAttribute(array(
 				'todo_record_description' => $vs_todo_datensatz,
@@ -436,7 +435,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// SAP Einzelnummer
-		$vs_sap_einzelnr = trim((string)$o_sheet->getCellByColumnAndRow(54, $vn_row_num));
+		$vs_sap_einzelnr = trim((string)$o_sheet->getCellByColumnAndRow(55, $vn_row_num));
 		if(strlen($vs_sap_einzelnr)>0){
 			$t_object->addAttribute(array(
 				'sap_asset_nr' => $vs_sap_einzelnr,
@@ -444,7 +443,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// UUID
-		$vs_uuid = trim((string)$o_sheet->getCellByColumnAndRow(56, $vn_row_num));
+		$vs_uuid = trim((string)$o_sheet->getCellByColumnAndRow(57, $vn_row_num));
 		if(strlen($vs_uuid)>0){
 			$t_object->addAttribute(array(
 				'uuid' => $vs_uuid,
@@ -452,7 +451,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Inventarstatus des Objekts
-		$vs_inventory_state = trim((string)$o_sheet->getCellByColumnAndRow(57, $vn_row_num));
+		$vs_inventory_state = trim((string)$o_sheet->getCellByColumnAndRow(58, $vn_row_num));
 		if(strlen($vs_inventory_state)>0){
 			$vs_inventory_state = mmsGetListItemIDByLabel('object_inventory_state_list', $vs_inventory_state, 'bestandsobjekt');
 
@@ -462,7 +461,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Datensatz geprüft
-		$vs_datensatz_geprueft = trim((string)$o_sheet->getCellByColumnAndRow(58, $vn_row_num));
+		$vs_datensatz_geprueft = trim((string)$o_sheet->getCellByColumnAndRow(59, $vn_row_num));
 		if((strlen($vs_datensatz_geprueft)>0) && (strtolower($vs_datensatz_geprueft) == 'x')){
 			$t_object->replaceAttribute(array(
 				'record_status' => 'yes',
@@ -474,8 +473,8 @@ function objects_import($ps_xlsx){
 		}
 
 		// Versicherungswert aktuell
-		$vs_vw_curr_eur = trim((string)$o_sheet->getCellByColumnAndRow(59, $vn_row_num));
-		$vs_vw_curr_date = trim((string)$o_sheet->getCellByColumnAndRow(60, $vn_row_num));
+		$vs_vw_curr_eur = trim((string)$o_sheet->getCellByColumnAndRow(60, $vn_row_num));
+		$vs_vw_curr_date = trim((string)$o_sheet->getCellByColumnAndRow(61, $vn_row_num));
 		if(strlen($vs_vw_curr_eur)>0) {
 
 			if(!preg_match("/^[\d\.\,]+\s?EUR$/",$vs_vw_curr_eur)) {
@@ -501,7 +500,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Abzug/Auflage
-		$vs_abzug_auflage = trim((string)$o_sheet->getCellByColumnAndRow(61, $vn_row_num));
+		$vs_abzug_auflage = trim((string)$o_sheet->getCellByColumnAndRow(62, $vn_row_num));
 		if(strlen($vs_abzug_auflage)>0) {
 			$t_object->addAttribute(array(
 				'edition' => $vs_abzug_auflage,
@@ -510,7 +509,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Zustand Beschreibung
-		$vs_zustand_beschreibung = trim((string)$o_sheet->getCellByColumnAndRow(62, $vn_row_num));
+		$vs_zustand_beschreibung = trim((string)$o_sheet->getCellByColumnAndRow(63, $vn_row_num));
 		if(strlen($vs_zustand_beschreibung)>0) {
 			$t_object->addAttribute(array(
 				'condition_description' => $vs_zustand_beschreibung,
@@ -518,7 +517,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Aufbewahrung
-		$vs_aufbewahrung = trim((string)$o_sheet->getCellByColumnAndRow(63, $vn_row_num));
+		$vs_aufbewahrung = trim((string)$o_sheet->getCellByColumnAndRow(64, $vn_row_num));
 		if(strlen($vs_aufbewahrung)>0) {
 			$t_object->addAttribute(array(
 				'safe_keeping' => $vs_aufbewahrung,
@@ -526,7 +525,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Negativnummer
-		$vs_negativnummer = trim((string)$o_sheet->getCellByColumnAndRow(64, $vn_row_num));
+		$vs_negativnummer = trim((string)$o_sheet->getCellByColumnAndRow(65, $vn_row_num));
 		if(strlen($vs_negativnummer)>0) {
 			$t_object->addAttribute(array(
 				'negative_number' => $vs_negativnummer,
@@ -546,7 +545,7 @@ function objects_import($ps_xlsx){
 		// NACH INSERT (RELATIONSHIPS, LABELS, ETC.)
 
 		// Titel
-		$vs_title = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
+		$vs_title = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
 		if(strlen($vs_title)<1){
 			$vs_title = "[LEER]";
 		}
@@ -556,11 +555,11 @@ function objects_import($ps_xlsx){
 		),$vn_locale_id,null,true);
 
 		// Aufbewahrungsort (mit Bearbeiter und Datum)
-		$vs_aufbewahrungsort = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
+		$vs_aufbewahrungsort = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
 		if(strlen($vs_aufbewahrungsort)>0) {
 			if($t_loc->load(array("idno" => $vs_aufbewahrungsort))){
 
-				$vs_sl_date = mmsGetDateTimeColumnFromSheet($o_sheet,5,$vn_row_num);
+				$vs_sl_date = mmsGetDateTimeColumnFromSheet($o_sheet,6,$vn_row_num);
 				if(strlen($vs_sl_date)>0){
 					if(!$o_tep->parse($vs_sl_date)){
 						$vs_sl_date = "";
@@ -571,9 +570,8 @@ function objects_import($ps_xlsx){
 				$t_rel = $t_object->addRelationship('ca_storage_locations',$t_loc->getPrimaryKey(),'repository',$vs_sl_date);
 
 				if($t_rel instanceof BaseRelationshipModel) {
-					$t_rel->setMode(ACCESS_WRITE);
 
-					$vs_sl_user = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
+					$vs_sl_user = trim((string)$o_sheet->getCellByColumnAndRow(5, $vn_row_num));
 					if(strlen($vs_sl_user)>0){
 						$t_rel->addAttribute(array(
 							'storage_location_user' => $vs_sl_user,
@@ -588,11 +586,11 @@ function objects_import($ps_xlsx){
 		}
 
 		// Standort (mit Bearbeiter und Datum)
-		$vs_standort = trim((string)$o_sheet->getCellByColumnAndRow(6, $vn_row_num));
+		$vs_standort = trim((string)$o_sheet->getCellByColumnAndRow(7, $vn_row_num));
 		if(strlen($vs_standort)>0){
 			if($t_loc->load(array("idno" => $vs_standort))){
 
-				$vs_sl_date = mmsGetDateTimeColumnFromSheet($o_sheet,8,$vn_row_num);
+				$vs_sl_date = mmsGetDateTimeColumnFromSheet($o_sheet,9,$vn_row_num);
 				if(strlen($vs_sl_date)>0){
 					if(!$o_tep->parse($vs_sl_date)){
 						$vs_sl_date = "";
@@ -603,9 +601,8 @@ function objects_import($ps_xlsx){
 				$t_rel = $t_object->addRelationship('ca_storage_locations',$t_loc->getPrimaryKey(),'current_location',$vs_sl_date);
 
 				if($t_rel instanceof BaseRelationshipModel) {
-					$t_rel->setMode(ACCESS_WRITE);
 
-					$vs_sl_user = trim((string)$o_sheet->getCellByColumnAndRow(7, $vn_row_num));
+					$vs_sl_user = trim((string)$o_sheet->getCellByColumnAndRow(8, $vn_row_num));
 					if(strlen($vs_sl_user)>0){
 						$t_rel->addAttribute(array(
 							'storage_location_user' => $vs_sl_user,
@@ -619,9 +616,9 @@ function objects_import($ps_xlsx){
 		}
 
 		// Person relationships
-		$vs_entity_ids = trim((string)$o_sheet->getCellByColumnAndRow(9, $vn_row_num));
-		$vs_entity_roles = trim((string)$o_sheet->getCellByColumnAndRow(10, $vn_row_num));
-		$vs_entity_attribution = trim((string)$o_sheet->getCellByColumnAndRow(11, $vn_row_num));
+		$vs_entity_ids = trim((string)$o_sheet->getCellByColumnAndRow(10, $vn_row_num));
+		$vs_entity_roles = trim((string)$o_sheet->getCellByColumnAndRow(11, $vn_row_num));
+		$vs_entity_attribution = trim((string)$o_sheet->getCellByColumnAndRow(13, $vn_row_num));
 
 		if(strlen($vs_entity_ids)>0) {
 			$va_entity_ids = explode(';',$vs_entity_ids);
@@ -660,7 +657,6 @@ function objects_import($ps_xlsx){
 							}
 
 							if(!is_null($vs_attribution_val_for_ca)){
-								$t_rel->setMode(ACCESS_WRITE);
 								$t_rel->addAttribute(array(
 									'objects_entities_attribution' => $vs_attribution_val_for_ca,
 								),'objects_entities_attribution');
@@ -676,7 +672,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Objektgruppen, Konvolute
-		$vs_objektgruppen = trim((string)$o_sheet->getCellByColumnAndRow(46, $vn_row_num));
+		$vs_objektgruppen = trim((string)$o_sheet->getCellByColumnAndRow(47, $vn_row_num));
 		if(strlen($vs_objektgruppen)>0){
 			$va_objektgruppen = explode(';',$vs_objektgruppen);
 
@@ -709,7 +705,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Ausstellungen
-		$vs_ausstellungen = trim((string)$o_sheet->getCellByColumnAndRow(47, $vn_row_num));
+		$vs_ausstellungen = trim((string)$o_sheet->getCellByColumnAndRow(48, $vn_row_num));
 		if(strlen($vs_ausstellungen)>0){
 			$va_ausstellungen = explode(';',$vs_ausstellungen);
 
@@ -730,7 +726,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Schlagworte
-		$vs_schlagworte = trim((string)$o_sheet->getCellByColumnAndRow(52, $vn_row_num));
+		$vs_schlagworte = trim((string)$o_sheet->getCellByColumnAndRow(53, $vn_row_num));
 		if(strlen($vs_schlagworte)>0){
 			$va_schlagworte = explode(";",$vs_schlagworte);
 			foreach($va_schlagworte as $vs_schlagwort){
@@ -742,7 +738,7 @@ function objects_import($ps_xlsx){
 		}
 
 		// Sammlung
-		$vs_sammlung = trim((string)$o_sheet->getCellByColumnAndRow(55, $vn_row_num));
+		$vs_sammlung = trim((string)$o_sheet->getCellByColumnAndRow(56, $vn_row_num));
 		if(strlen($vs_sammlung)>0){
 			if($t_col->load(array('idno' => $vs_sammlung))) {
 				$t_object->addRelationship('ca_collections',$t_col->getPrimaryKey(),'related_to');

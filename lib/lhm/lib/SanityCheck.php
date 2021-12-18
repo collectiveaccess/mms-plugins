@@ -571,7 +571,7 @@ class SanityCheck {
 		$vn_i = 1; // Startindex [0 = nutzerdefinierte idno]
 
 		do {
-			$vs_head = trim((string)$po_sheet->getCellByColumnAndRow($vn_i, 1));
+			$vs_head = trim((string)$po_sheet->getCellByColumnAndRow($vn_i + 1, 1));
 			$va_item = $t_list->getItemFromListByLabel('storage_location_types', $vs_head);
 
 			if(!isset($va_item['item_id'])){
@@ -598,13 +598,13 @@ class SanityCheck {
 			$vn_row_num = $o_row->getRowIndex();
 			if($vn_row_num==1) continue; // skip row with headers
 
-			$vs_user_idno = trim($po_sheet->getCellByColumnAndRow(0, $vn_row_num)->getCalculatedValue());
+			$vs_user_idno = trim($po_sheet->getCellByColumnAndRow(1, $vn_row_num)->getCalculatedValue());
 			$vn_label_column = 1;
 			$vs_concat_idno = "";
 
 			do {
-				$vs_label_part = $po_sheet->getCellByColumnAndRow($vn_label_column, $vn_row_num)->getFormattedValue();
-				$vs_delimiter = $po_sheet->getCellByColumnAndRow($vn_label_column+1, $vn_row_num)->getFormattedValue();
+				$vs_label_part = $po_sheet->getCellByColumnAndRow($vn_label_column+1, $vn_row_num)->getFormattedValue();
+				$vs_delimiter = $po_sheet->getCellByColumnAndRow($vn_label_column+2, $vn_row_num)->getFormattedValue();
 
 				if(strlen($vs_label_part)>0 || strlen($vs_delimiter)>0) {
 					$vs_concat_idno .= $vs_label_part.$vs_delimiter;
@@ -636,7 +636,7 @@ class SanityCheck {
 			$vn_row_num = $o_row->getRowIndex();
 			if($vn_row_num==1) continue; // skip rows with headers
 
-			$vs_uuid = trim((string)$po_sheet->getCellByColumnAndRow(0, $vn_row_num));
+			$vs_uuid = trim((string)$po_sheet->getCellByColumnAndRow(1, $vn_row_num));
 
 			$o_search = new ObjectSearch();
 			$o_result = $o_search->search('ca_objects.uuid:"'.$vs_uuid.'"', array('dontFilterByACL' => true));
@@ -667,7 +667,7 @@ class SanityCheck {
 			if($vn_row_num==1) continue; // skip rows with headers
 
 			// Dateipfad + Dateiname
-			$vs_file = trim((string)$po_sheet->getCellByColumnAndRow(1, $vn_row_num));
+			$vs_file = trim((string)$po_sheet->getCellByColumnAndRow(2, $vn_row_num));
 
 			// this returns false if the file doesn't exist
 			$vs_local_path = mmsGetRealPath($g_media_import_base_path.DIRECTORY_SEPARATOR.$vs_file);
@@ -713,9 +713,9 @@ class SanityCheck {
 
 			$vs_base_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(9);
 
-			$vs_person = trim((string)$po_sheet->getCellByColumnAndRow(9, $vn_row_num));
-			$vs_role = trim((string)$po_sheet->getCellByColumnAndRow(10, $vn_row_num));
-			$vs_attribution = trim((string)$po_sheet->getCellByColumnAndRow(11, $vn_row_num));
+			$vs_person = trim((string)$po_sheet->getCellByColumnAndRow(10, $vn_row_num));
+			$vs_role = trim((string)$po_sheet->getCellByColumnAndRow(11, $vn_row_num));
+			$vs_attribution = trim((string)$po_sheet->getCellByColumnAndRow(12, $vn_row_num));
 
 			if(strlen($vs_person)>0){
 				$vn_expected = sizeof(explode(';',$vs_person));
@@ -723,14 +723,14 @@ class SanityCheck {
 				if(strlen($vs_role)>0) {
 					$va_roles = explode(';', $vs_role);
 					if($vn_expected != sizeof($va_roles)) {
-						$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(10);
+						$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(11);
 						self::addError("Plausibilitätscheck [Objekte speziell]: Es wird erwartet, dass in Spalte {$vs_broken_col} gleich viele Werte vorhanden sind wie in Spalte {$vs_base_col}. In Zeile $vn_row_num ist das nicht der Fall.", Zend_Log::WARN);
 						$vb_return = false;
 					}
 
 					foreach($va_roles as $vs_r){
 						if(!mmsGetRelTypeCodeByLabel('ca_objects_x_entities',trim($vs_r))) {
-							$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(10);
+							$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(11);
 							self::addError("Plausibilitätscheck [Objekte speziell]: Es wird erwartet, dass in Spalte {$vs_broken_col} nur Referenzen auf existierende Rollenbezeichnungen vorhanden sind. In Zeile $vn_row_num ist das nicht der Fall, der Wert {$vs_r} konnte nicht zugeordnet werden.", Zend_Log::WARN);
 							$vb_return = false;
 						}
@@ -739,7 +739,7 @@ class SanityCheck {
 
 				if(strlen($vs_attribution)>0) {
 					if($vn_expected != sizeof(explode(';', $vs_attribution))) {
-						$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(11);
+						$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(12);
 						self::addError("Plausibilitätscheck [Objekte speziell]: Es wird erwartet, dass in Spalte {$vs_broken_col} gleich viele Werte vorhanden sind wie in Spalte {$vs_base_col}. In Zeile $vn_row_num ist das nicht der Fall.", Zend_Log::WARN);
 						$vb_return = false;
 					}
@@ -765,8 +765,8 @@ class SanityCheck {
 			$vn_row_num = $o_row->getRowIndex();
 			if($vn_row_num==1) continue; // skip rows with headers
 
-			$vs_insurance_date_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(40);
-			$vs_insurance_dates = trim((string)$po_sheet->getCellByColumnAndRow(40, $vn_row_num));
+			$vs_insurance_date_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(41);
+			$vs_insurance_dates = trim((string)$po_sheet->getCellByColumnAndRow(41, $vn_row_num));
 
 			if(strlen($vs_insurance_dates)>0) {
 				$va_insurance_dates = explode(';',$vs_insurance_dates);
@@ -796,8 +796,8 @@ class SanityCheck {
 			$vn_row_num = $o_row->getRowIndex();
 			if($vn_row_num==1) continue; // skip rows with headers
 
-			$vs_object_id = trim((string)$po_sheet->getCellByColumnAndRow(0, $vn_row_num));
-			$vs_collection_idno = trim((string)$po_sheet->getCellByColumnAndRow(55, $vn_row_num));
+			$vs_object_id = trim((string)$po_sheet->getCellByColumnAndRow(1, $vn_row_num));
+			$vs_collection_idno = trim((string)$po_sheet->getCellByColumnAndRow(56, $vn_row_num));
 
 			if(strlen($vs_collection_idno)>0){
 
@@ -845,21 +845,21 @@ class SanityCheck {
 	 * Helper für aktuelles Level in der Keyword-Tabelle
 	 */
 	static public function checkKeyWordTableLevel($po_sheet, $pn_singular_col, $pn_row_id) {
-		$vs_name_singular = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col, $pn_row_id));
+		$vs_name_singular = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+1, $pn_row_id));
 
 		if(strlen($vs_name_singular)>0) { // es gibt Daten in dieser Ebene -> Singular, Plural, idno werden Pflicht
-			$vs_name_plural = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+1, $pn_row_id));
+			$vs_name_plural = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+2, $pn_row_id));
 
 			if(strlen($vs_name_plural)<1) {
-				$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($pn_singular_col+1);
+				$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($pn_singular_col+2);
 				self::addError("Plausibilitätscheck [Schlagworte speziell]: Bei Schlagwort-Importen müssen für alle Einträge, die Daten in bestimmten Ebenen enthalten, Singular, Plural und IDNO ausgefüllt sein. In Zeile {$pn_row_id} ist dies nicht der Fall (Spalte {$vs_col}).");
 				return false;
 			}
 
-			$vs_idno = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+2, $pn_row_id));
+			$vs_idno = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+3, $pn_row_id));
 
 			if(strlen($vs_idno)<1) {
-				$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($pn_singular_col+2);
+				$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($pn_singular_col+3);
 				self::addError("Plausibilitätscheck [Schlagworte speziell]: Bei Schlagwort-Importen müssen für alle Einträge, die Daten in bestimmten Ebenen enthalten, Singular, Plural und IDNO ausgefüllt sein. In Zeile {$pn_row_id} ist dies nicht der Fall (Spalte {$vs_col}).");
 				return false;
 			}
