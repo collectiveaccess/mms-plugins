@@ -484,7 +484,7 @@ class SanityCheck {
 	 * @return boolean Bedingung erfüllt oder nicht?
 	 */
 	static public function checkObjectsForDisplayDates($po_sheet) {
-		return self::checkSomethingForIfOneThenBoth($po_sheet,14,15);
+		return self::checkSomethingForIfOneThenBoth($po_sheet,15,16);
 	}
 
 	/**
