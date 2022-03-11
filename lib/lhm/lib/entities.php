@@ -35,7 +35,7 @@ function entities_import($ps_xlsx) {
 		$t_entity = new ca_entities();
 
 		// entity ID
-		$vs_entity_id = trim((string)$o_sheet->getCellByColumnAndRow(0, $vn_row_num));
+		$vs_entity_id = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
 
 		if(strlen($vs_entity_id)<1) {
 			mmsLog("Personen [{$ps_xlsx}]: Die Personen_ID ist leer für Zeile {$vn_row_num}. Die gesamte Zeile wurde ignoriert.", Zend_Log::WARN);
@@ -58,12 +58,11 @@ function entities_import($ps_xlsx) {
 		}
 
 		$t_entity->setTransaction($o_trans);
-		$t_entity->setMode(ACCESS_WRITE);
 		$t_entity->set('access',0);
 		$t_entity->set('status',1);
 
 		// Type ID
-		$vs_type = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
+		$vs_type = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
 
 		switch(strtolower($vs_type)){
 			case 'i' :
@@ -81,8 +80,8 @@ function entities_import($ps_xlsx) {
 		$t_entity->set('type_id',$vs_type_id);
 
 		// Lebensdaten
-		$vs_displaydate = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
-		$vs_lifespan = mmsGetDateTimeColumnFromSheet($o_sheet, 5, $vn_row_num);
+		$vs_displaydate = trim((string)$o_sheet->getCellByColumnAndRow(5, $vn_row_num));
+		$vs_lifespan = mmsGetDateTimeColumnFromSheet($o_sheet, 6, $vn_row_num);
 
 		if(strlen($vs_displaydate) > 0 || strlen($vs_lifespan) > 0) {
 			if(!$o_tep->parse($vs_lifespan)) {
@@ -97,28 +96,28 @@ function entities_import($ps_xlsx) {
 		}
 
 		// Geburtsort (original + GeoNames)
-		$vs_geburtsort_org = trim((string)$o_sheet->getCellByColumnAndRow(6, $vn_row_num));
-		$vs_geburtsort_geonames = trim((string)$o_sheet->getCellByColumnAndRow(7, $vn_row_num));
+		$vs_geburtsort_org = trim((string)$o_sheet->getCellByColumnAndRow(7, $vn_row_num));
+		$vs_geburtsort_geonames = trim((string)$o_sheet->getCellByColumnAndRow(8, $vn_row_num));
 
 		add_person_places_to_entity($t_entity,$vs_geburtsort_org,$vs_geburtsort_geonames,'geburtsort');
 
 		// Sterbeort (original + GeoNames)
-		$vs_sterbeort_org = trim((string)$o_sheet->getCellByColumnAndRow(8, $vn_row_num));
-		$vs_sterbeort_geonames = trim((string)$o_sheet->getCellByColumnAndRow(9, $vn_row_num));
+		$vs_sterbeort_org = trim((string)$o_sheet->getCellByColumnAndRow(9, $vn_row_num));
+		$vs_sterbeort_geonames = trim((string)$o_sheet->getCellByColumnAndRow(10, $vn_row_num));
 
 		add_person_places_to_entity($t_entity,$vs_sterbeort_org,$vs_sterbeort_geonames,'sterbeort');
 
 		// Ort mit bestimmter Art
-		$vs_ort_best_org = trim((string)$o_sheet->getCellByColumnAndRow(10, $vn_row_num));
-		$vs_ort_best_geonames = trim((string)$o_sheet->getCellByColumnAndRow(11, $vn_row_num));
-		$vs_ort_best_art = trim((string)$o_sheet->getCellByColumnAndRow(12, $vn_row_num));
+		$vs_ort_best_org = trim((string)$o_sheet->getCellByColumnAndRow(11, $vn_row_num));
+		$vs_ort_best_geonames = trim((string)$o_sheet->getCellByColumnAndRow(12, $vn_row_num));
+		$vs_ort_best_art = trim((string)$o_sheet->getCellByColumnAndRow(13, $vn_row_num));
 
 		$vs_ort_best_art = mmsGetListItemIDByLabel('person_places_type_list',$vs_ort_best_art,'wirkungsort');
 
 		add_person_places_to_entity($t_entity,$vs_ort_best_org,$vs_ort_best_geonames,$vs_ort_best_art);
 
 		// Beruf
-		$vs_beruf = trim((string)$o_sheet->getCellByColumnAndRow(16, $vn_row_num));
+		$vs_beruf = trim((string)$o_sheet->getCellByColumnAndRow(17, $vn_row_num));
 		if(strlen($vs_beruf)>0){
 			$t_entity->addAttribute(array(
 				'occupation' => $vs_beruf,
@@ -126,15 +125,15 @@ function entities_import($ps_xlsx) {
 		}
 
 		// GND
-		$vs_gnd = trim((string)$o_sheet->getCellByColumnAndRow(17, $vn_row_num));
+		$vs_gnd = trim((string)$o_sheet->getCellByColumnAndRow(18, $vn_row_num));
 		if(strlen($vs_gnd)>0){
 			$t_entity->addAttribute(array(
 				'gnd_nr' => $vs_gnd,
 			),'gnd_nr');
 		}
 
-		$vs_wip_text = trim((string)$o_sheet->getCellByColumnAndRow(18, $vn_row_num));
-		$vs_wip_art = trim((string)$o_sheet->getCellByColumnAndRow(19, $vn_row_num));
+		$vs_wip_text = trim((string)$o_sheet->getCellByColumnAndRow(19, $vn_row_num));
+		$vs_wip_art = trim((string)$o_sheet->getCellByColumnAndRow(20, $vn_row_num));
 
 		$vs_wip_art = mmsGetListItemIDByLabel('add_information_person_list',$vs_wip_art,'null');
 
@@ -145,7 +144,7 @@ function entities_import($ps_xlsx) {
 			),'add_information_person');
 		}
 
-		$vs_geprueft = trim((string)$o_sheet->getCellByColumnAndRow(20, $vn_row_num));
+		$vs_geprueft = trim((string)$o_sheet->getCellByColumnAndRow(21, $vn_row_num));
 		switch(strtolower($vs_geprueft)) {
 			case 'x':
 				$vs_geprueft_val = 'yes';
@@ -170,8 +169,8 @@ function entities_import($ps_xlsx) {
 		}
 
 		// labels
-		$vs_surname = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
-		$vs_forename = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
+		$vs_surname = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
+		$vs_forename = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
 
 		if((strlen($vs_surname)>0) || (strlen($vs_forename)>0)){
 			$t_entity->addLabel(array(
@@ -184,9 +183,9 @@ function entities_import($ps_xlsx) {
 			),$vn_locale_id,null,true);
 		}
 
-		$vs_alt_surnames = trim((string)$o_sheet->getCellByColumnAndRow(13, $vn_row_num));
-		$vs_alt_forenames = trim((string)$o_sheet->getCellByColumnAndRow(14, $vn_row_num));
-		$vs_alt_name_types = trim((string)$o_sheet->getCellByColumnAndRow(15, $vn_row_num));
+		$vs_alt_surnames = trim((string)$o_sheet->getCellByColumnAndRow(14, $vn_row_num));
+		$vs_alt_forenames = trim((string)$o_sheet->getCellByColumnAndRow(15, $vn_row_num));
+		$vs_alt_name_types = trim((string)$o_sheet->getCellByColumnAndRow(16, $vn_row_num));
 
 		// Plausibilitätscheck stellt bereits sicher, dass alle gleich viele Werte haben!
 		$va_alt_surnames = explode(';',$vs_alt_surnames);

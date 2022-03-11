@@ -62,8 +62,6 @@ class MMSInsuranceFeatures {
 			$vn_insurance_sum += mmsExtractFloatFromCurrencyValue($vs_val);
 		}
 
-		$t_loan->setMode(ACCESS_WRITE);
-
 		// editiere den existierenden automatisch gesetzten Wert oder lege einen neuen an
 		$t_loan->replaceAttribute(array(
 			'loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'),

@@ -27,14 +27,14 @@ function keyword_import($ps_xlsx) {
 		mmsLog("Schlagworte [{$ps_xlsx}]: Verarbeite Zeile {$vn_row_num}", Zend_Log::DEBUG);
 		$o_trans = new Transaction();
 
-		$vs_list_code = trim((string)$o_sheet->getCellByColumnAndRow(0, $vn_row_num));
+		$vs_list_code = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
 
 		if(!$t_list->load(array('list_code' => $vs_list_code))){
 			mmsLog("Schlagworte [{$ps_xlsx}]: Listen Code '$vs_list_code' für Zeile $vn_row_num nicht gefunden. Die Zeile wird übersprungen.", Zend_Log::WARN);
 			continue;
 		}
 
-		$vn_current_singular_ptr = 1;
+		$vn_current_singular_ptr = 2;
 		$vn_last_level_id = null;
 
 		do {

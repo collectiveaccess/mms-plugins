@@ -147,7 +147,8 @@ class SanityCheck {
 			if(isset($va_cfg['skip_row_if_empty']) && is_array($va_cfg['skip_row_if_empty']) && sizeof($va_cfg['skip_row_if_empty'])>0) {
 				$vb_skip = true;
 				foreach($va_cfg['skip_row_if_empty'] as $vn_col) {
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 					if(strlen($vs_val)>0){
 						$vb_skip = false;
 						break;
@@ -159,10 +160,11 @@ class SanityCheck {
 			// Pflichtspalten überprüfen
 			if(isset($va_cfg['mandatory_columns']) && is_array($va_cfg['mandatory_columns'])) {
 				foreach($va_cfg['mandatory_columns'] as $vn_col) {
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 					if(strlen($vs_val)<1){
-						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString((string)$vn_col);
-						self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vn_col} ist Pflicht, aber hat keinen Wert für Zeile {$vn_row_num}.");
+						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString((string)$c);
+						self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$c} ist Pflicht, aber hat keinen Wert für Zeile {$vn_row_num}.");
 						$vb_return = false;
 					}
 				}
@@ -171,16 +173,17 @@ class SanityCheck {
 			// Eindeutige Spalten überprüfen
 			if(isset($va_cfg['unique_columns']) && is_array($va_cfg['unique_columns'])) {
 				foreach($va_cfg['unique_columns'] as $vn_col){
-					if(!is_array($va_unique_col_data[$vn_col])) { $va_unique_col_data[$vn_col] = array(); }
+					$c = $vn_col+1;
+					if(!is_array($va_unique_col_data[$c])) { $va_unique_col_data[$c] = array(); }
 
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 					if(strlen($vs_val)>0){
-						if(in_array($vs_val, $va_unique_col_data[$vn_col])){
-							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex((string)$vn_col);
+						if(in_array($vs_val, $va_unique_col_data[$c])){
+							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex((string)$c);
 							self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} soll eindeutige Werte enthalten, aber der Wert in Zeile {$vn_row_num} ('$vs_val') existiert bereits in einer vorigen Zeile.");
 							$vb_return = false;
 						} else {
-							$va_unique_col_data[$vn_col][] = $vs_val;
+							$va_unique_col_data[$c][] = $vs_val;
 						}
 					}
 				}
@@ -189,11 +192,13 @@ class SanityCheck {
 			// Primärschlüssel Spalte prüfen
 			if(isset($va_cfg['primary_key_column']) && is_array($va_cfg['primary_key_column'])) {
 				$vn_col = $va_cfg['primary_key_column']['column'];
+				$c = $vn_col+1;
+				
 				$vs_table = $va_cfg['primary_key_column']['table'];
-				$vm_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+				$vm_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 				if(strlen($vm_val)>0) {
 					if(!is_numeric($vm_val)) {
-						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 						self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} soll als Primärschlüssel für {$vs_table} benutzt werden, aber der Wert in Zeile {$vn_row_num} ('$vm_val') ist keine Zahl.");
 						return false;
 					}
@@ -205,7 +210,7 @@ class SanityCheck {
 					}
 
 					if($t_primary_key_check_instance->load($vm_val)) {
-						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 						self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} soll als Primärschlüssel für {$vs_table} benutzt werden, aber es gibt bereits einen Datensatz mit dem Wert in Zeile {$vn_row_num} ('$vm_val').");
 						return false;
 					}
@@ -213,7 +218,7 @@ class SanityCheck {
 					$vn_max_val = mmsGetMaxPkValue($t_primary_key_check_instance->tableName(), $t_primary_key_check_instance->primaryKey());
 
 					if($vm_val <= $vn_max_val) {
-						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 						self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} soll als Primärschlüssel für {$vs_table} benutzt werden, aber der Wert in Zeile {$vn_row_num} ('$vm_val') ist nicht größer als der bereits existierende größte Wert ('$vn_max_val'').");
 						return false;
 					}
@@ -226,25 +231,26 @@ class SanityCheck {
 			// Streng monotone Spalten prüfen
 			if(isset($va_cfg['ascending_columns']) && is_array($va_cfg['ascending_columns'])) {
 				foreach($va_cfg['ascending_columns'] as $vn_col) {
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 					if(strlen($vs_val)>0) {
 						if(!is_numeric($vs_val)) {
-							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 							self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} soll aufsteigende Werte enthalten, aber der Wert in Zeile {$vn_row_num} ('$vs_val') ist keine Zahl.");
 							return false;
 						}
 
-						if(!isset($va_ascending_column_vals[$vn_col])) { // Erster Wert
-							$va_ascending_column_vals[$vn_col] = intval($vs_val);
+						if(!isset($va_ascending_column_vals[$c])) { // Erster Wert
+							$va_ascending_column_vals[$c] = intval($vs_val);
 							continue;
 						}
 
-						if(intval($vs_val) <= $va_ascending_column_vals[$vn_col]) {
-							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+						if(intval($vs_val) <= $va_ascending_column_vals[$c]) {
+							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 							self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} soll aufsteigende Werte enthalten, aber der Wert in Zeile {$vn_row_num} ('$vs_val') ist kleiner oder gleich wie der bisherige größte Wert.");
 							return false;
 						} else {
-							$va_ascending_column_vals[$vn_col] = intval($vs_val);
+							$va_ascending_column_vals[$c] = intval($vs_val);
 						}
 					}
 				}
@@ -253,9 +259,10 @@ class SanityCheck {
 			// Whitelisted Spalten prüfen
 			if(isset($va_cfg['whitlelisted_columns']) && is_array($va_cfg['whitlelisted_columns'])) {
 				foreach($va_cfg['whitlelisted_columns'] as $vn_col => $va_col_vals){
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 					if(!in_array($vs_val, $va_col_vals)){
-						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 						self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} hat eine Whitelist und der Wert in Zeile {$vn_row_num} ('$vs_val') gehört nicht zu den erlaubten Werten.");
 						$vb_return = false;
 					}
@@ -265,10 +272,11 @@ class SanityCheck {
 			// Listenspalten prüfen
 			if(isset($va_cfg['list_columns']) && is_array($va_cfg['list_columns'])) {
 				foreach($va_cfg['list_columns'] as $vn_col => $vs_list_code){
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 					if(strlen($vs_val)>0){
 						if(!$t_list->getItemIDFromListByLabel($vs_list_code, $vs_val)){
-							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 							self::addError("Plausibilitätscheck [{$ps_xlsx}]: Werte in Spalte {$vs_col} sollen via Bezeichnung auf Liste {$vs_list_code} verweisen. Wert '$vs_val' konnte in dieser Liste nicht gefunden werden.");
 							$vb_return = false;
 						}
@@ -279,11 +287,12 @@ class SanityCheck {
 			// Datumsspalten überprüfen
 			if(isset($va_cfg['date_columns']) && is_array($va_cfg['date_columns'])) {
 				foreach($va_cfg['date_columns'] as $vn_col){
-					$vs_val = mmsGetDateTimeColumnFromSheet($o_sheet,$vn_col,$vn_row_num);
+					$c = $vn_col+1;
+					$vs_val = mmsGetDateTimeColumnFromSheet($o_sheet,$c,$vn_row_num);
 					// wenn ein Wert existiert, muss er parse-bar sein!
 					if(strlen($vs_val)>0) {
 						if(!$o_tep->parse($vs_val)) {
-							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 							self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} sollte nur CA-konforme Datumswerte enthalten. Der Wert in Zeile {$vn_row_num} ('$vs_val') ist kein solches Datum.");
 							$vb_return = false;
 						}
@@ -294,8 +303,9 @@ class SanityCheck {
 			// Beziehungs-Spalten überprüfen
 			if(isset($va_cfg['relationship_columns']) && is_array($va_cfg['relationship_columns'])) {
 				foreach($va_cfg['relationship_columns'] as $vn_col => $va_info){
-					if(!isset($va_table_instances[$vn_col])) { $va_table_instances[$vn_col] = Datamodel::getInstance($va_info['table']); }
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					if(!isset($va_table_instances[$c])) { $va_table_instances[$c] = Datamodel::getInstance($va_info['table']); }
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 
 					if(strlen($vs_val)>0){ // Beziehungsspalten sind in der Regel optional, also prüfe nur, wenn auch Wert eingesetzt wurde
 						if(isset($va_info['delimiter']) && $va_info['delimiter']){
@@ -304,19 +314,19 @@ class SanityCheck {
 								$vs_v = trim($vs_v);
 
 								if($va_info['field'] == 'label'){
-									if(!$va_table_instances[$vn_col]->loadByLabel(array($va_table_instances[$vn_col]->getLabelDisplayField() => $vs_v))){
+									if(!$va_table_instances[$c]->loadByLabel(array($va_table_instances[$c]->getLabelDisplayField() => $vs_v))){
 										self::addError("Plausibilitätscheck [{$ps_xlsx}]: Für Spalte {$vs_col} sollen existierende ".$va_info['display']." geladen werden. Für einen Wert in Zeile {$vn_row_num} ('$vs_v') lässt sich kein Datensatz finden.");
 										$vb_return = false;
 									}
-								} elseif(!$va_table_instances[$vn_col]->load(array($va_info['field'] => $vs_v))) {
-									$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+								} elseif(!$va_table_instances[$c]->load(array($va_info['field'] => $vs_v))) {
+									$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 									self::addError("Plausibilitätscheck [{$ps_xlsx}]: Für Spalte {$vs_col} sollen existierende ".$va_info['display']." geladen werden. Für einen Wert in Zeile {$vn_row_num} ('$vs_v') lässt sich kein Datensatz finden.");
 									$vb_return = false;
 								}
 							}
 						} else {
-							if(!$va_table_instances[$vn_col]->load(array($va_info['field'] => $vs_val))) {
-								$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+							if(!$va_table_instances[$c]->load(array($va_info['field'] => $vs_val))) {
+								$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 								self::addError("Plausibilitätscheck [{$ps_xlsx}]: Für Spalte {$vs_col} sollen existierende ".$va_info['display']." geladen werden. Für den Wert in Zeile {$vn_row_num} ('$vs_val') lässt sich kein Datensatz finden.");
 								$vb_return = false;
 							}
@@ -328,10 +338,11 @@ class SanityCheck {
 			// Reguläre Ausdrücke checken
 			if(isset($va_cfg['regex_columns']) && is_array($va_cfg['regex_columns'])) {
 				foreach($va_cfg['regex_columns'] as $vn_col => $vs_regex){
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 					if(strlen($vs_val)>0){ // Spalten sind in der Regel optional, also prüfe nur, wenn auch Wert eingesetzt wurde
 						if(!preg_match($vs_regex,$vs_val)) {
-							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+							$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 							self::addError("Plausibilitätscheck [{$ps_xlsx}]: Der Wert in Spalte {$vs_col} soll dem regulären Ausdruck '{$vs_regex}' entsprechen. Auf den Wert in Zeile {$vn_row_num} ('$vs_val') trifft das nicht zu.");
 							$vb_return = false;
 						}
@@ -344,14 +355,15 @@ class SanityCheck {
 				foreach($va_cfg['multivalue_bundles'] as $va_value_bundle) {
 					$vn_value_count = null;
 					foreach($va_value_bundle as $vn_col) {
-						$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+						$c = $vn_col+1;
+						$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 						if(strlen($vs_val)>0){
 							$vn_actual = sizeof(explode(';',$vs_val));
 							if(is_null($vn_value_count)) { // Erster Wert => Setze "expected"
 								$vn_value_count = $vn_actual;
 							} else {
 								if($vn_value_count != $vn_actual){
-									$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+									$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 									self::addError("Plausibilitätscheck [{$ps_xlsx}]: Für Spalte {$vs_col} in Zeile {$vn_row_num} wurden {$vn_value_count} Semikolon-getrennte Werte erwartet, ermittelt auf Basis des Werts einer früheren Spalte. Gefunden wurden stattdessen {$vn_actual}.");
 									$vb_return = false;
 								}
@@ -364,10 +376,11 @@ class SanityCheck {
 			// Währungsspalten pruefen
 			if(isset($va_cfg['currency_columns']) && is_array($va_cfg['currency_columns'])) {
 				foreach($va_cfg['currency_columns'] as $vn_col ) {
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 					if(strlen($vs_val)>0){ // Spalten sind in der Regel optional, also prüfe nur, wenn auch Wert eingesetzt wurde
 
-						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+						$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 
 						if (preg_match("!^([\d\.\,]+)([^\d]+)$!", $vs_val, $va_matches)) {
 							$vs_decimal_value = $va_matches[1];
@@ -403,13 +416,14 @@ class SanityCheck {
 			if(isset($va_cfg['text_columns']) && is_array($va_cfg['text_columns'])) {
 
 				foreach($va_cfg['text_columns'] as $vn_col => $va_col_info) {
-					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($vn_col, $vn_row_num));
+					$c = $vn_col+1;
+					$vs_val = trim((string)$o_sheet->getCellByColumnAndRow($c, $vn_row_num));
 
 					if(($va_col_info['min'] == 0) && (strlen($vs_val)<1)) { // Spalten mit min=0 sind optional
 						continue;
 					}
 
-					$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($vn_col);
+					$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
 
 					if (strlen($vs_val) < $va_col_info['min']) {
 						self::addError("Plausibilitätscheck [{$ps_xlsx}]: Spalte {$vs_col} soll Textwerte einer gewissen Länge enthalten. Der Wert in Zeile {$vn_row_num} ist zu kurz.");
@@ -557,7 +571,7 @@ class SanityCheck {
 		$vn_i = 1; // Startindex [0 = nutzerdefinierte idno]
 
 		do {
-			$vs_head = trim((string)$po_sheet->getCellByColumnAndRow($vn_i, 1));
+			$vs_head = trim((string)$po_sheet->getCellByColumnAndRow($vn_i + 1, 1));
 			$va_item = $t_list->getItemFromListByLabel('storage_location_types', $vs_head);
 
 			if(!isset($va_item['item_id'])){
@@ -584,13 +598,13 @@ class SanityCheck {
 			$vn_row_num = $o_row->getRowIndex();
 			if($vn_row_num==1) continue; // skip row with headers
 
-			$vs_user_idno = trim($po_sheet->getCellByColumnAndRow(0, $vn_row_num)->getCalculatedValue());
+			$vs_user_idno = trim($po_sheet->getCellByColumnAndRow(1, $vn_row_num)->getCalculatedValue());
 			$vn_label_column = 1;
 			$vs_concat_idno = "";
 
 			do {
-				$vs_label_part = $po_sheet->getCellByColumnAndRow($vn_label_column, $vn_row_num)->getFormattedValue();
-				$vs_delimiter = $po_sheet->getCellByColumnAndRow($vn_label_column+1, $vn_row_num)->getFormattedValue();
+				$vs_label_part = $po_sheet->getCellByColumnAndRow($vn_label_column+1, $vn_row_num)->getFormattedValue();
+				$vs_delimiter = $po_sheet->getCellByColumnAndRow($vn_label_column+2, $vn_row_num)->getFormattedValue();
 
 				if(strlen($vs_label_part)>0 || strlen($vs_delimiter)>0) {
 					$vs_concat_idno .= $vs_label_part.$vs_delimiter;
@@ -622,7 +636,7 @@ class SanityCheck {
 			$vn_row_num = $o_row->getRowIndex();
 			if($vn_row_num==1) continue; // skip rows with headers
 
-			$vs_uuid = trim((string)$po_sheet->getCellByColumnAndRow(0, $vn_row_num));
+			$vs_uuid = trim((string)$po_sheet->getCellByColumnAndRow(1, $vn_row_num));
 
 			$o_search = new ObjectSearch();
 			$o_result = $o_search->search('ca_objects.uuid:"'.$vs_uuid.'"', array('dontFilterByACL' => true));
@@ -653,7 +667,7 @@ class SanityCheck {
 			if($vn_row_num==1) continue; // skip rows with headers
 
 			// Dateipfad + Dateiname
-			$vs_file = trim((string)$po_sheet->getCellByColumnAndRow(1, $vn_row_num));
+			$vs_file = trim((string)$po_sheet->getCellByColumnAndRow(2, $vn_row_num));
 
 			// this returns false if the file doesn't exist
 			$vs_local_path = mmsGetRealPath($g_media_import_base_path.DIRECTORY_SEPARATOR.$vs_file);
@@ -699,9 +713,9 @@ class SanityCheck {
 
 			$vs_base_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(9);
 
-			$vs_person = trim((string)$po_sheet->getCellByColumnAndRow(9, $vn_row_num));
-			$vs_role = trim((string)$po_sheet->getCellByColumnAndRow(10, $vn_row_num));
-			$vs_attribution = trim((string)$po_sheet->getCellByColumnAndRow(11, $vn_row_num));
+			$vs_person = trim((string)$po_sheet->getCellByColumnAndRow(10, $vn_row_num));
+			$vs_role = trim((string)$po_sheet->getCellByColumnAndRow(11, $vn_row_num));
+			$vs_attribution = trim((string)$po_sheet->getCellByColumnAndRow(12, $vn_row_num));
 
 			if(strlen($vs_person)>0){
 				$vn_expected = sizeof(explode(';',$vs_person));
@@ -709,14 +723,14 @@ class SanityCheck {
 				if(strlen($vs_role)>0) {
 					$va_roles = explode(';', $vs_role);
 					if($vn_expected != sizeof($va_roles)) {
-						$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(10);
+						$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(11);
 						self::addError("Plausibilitätscheck [Objekte speziell]: Es wird erwartet, dass in Spalte {$vs_broken_col} gleich viele Werte vorhanden sind wie in Spalte {$vs_base_col}. In Zeile $vn_row_num ist das nicht der Fall.", Zend_Log::WARN);
 						$vb_return = false;
 					}
 
 					foreach($va_roles as $vs_r){
 						if(!mmsGetRelTypeCodeByLabel('ca_objects_x_entities',trim($vs_r))) {
-							$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(10);
+							$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(11);
 							self::addError("Plausibilitätscheck [Objekte speziell]: Es wird erwartet, dass in Spalte {$vs_broken_col} nur Referenzen auf existierende Rollenbezeichnungen vorhanden sind. In Zeile $vn_row_num ist das nicht der Fall, der Wert {$vs_r} konnte nicht zugeordnet werden.", Zend_Log::WARN);
 							$vb_return = false;
 						}
@@ -725,7 +739,7 @@ class SanityCheck {
 
 				if(strlen($vs_attribution)>0) {
 					if($vn_expected != sizeof(explode(';', $vs_attribution))) {
-						$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(11);
+						$vs_broken_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(12);
 						self::addError("Plausibilitätscheck [Objekte speziell]: Es wird erwartet, dass in Spalte {$vs_broken_col} gleich viele Werte vorhanden sind wie in Spalte {$vs_base_col}. In Zeile $vn_row_num ist das nicht der Fall.", Zend_Log::WARN);
 						$vb_return = false;
 					}
@@ -751,8 +765,8 @@ class SanityCheck {
 			$vn_row_num = $o_row->getRowIndex();
 			if($vn_row_num==1) continue; // skip rows with headers
 
-			$vs_insurance_date_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(40);
-			$vs_insurance_dates = trim((string)$po_sheet->getCellByColumnAndRow(40, $vn_row_num));
+			$vs_insurance_date_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(41);
+			$vs_insurance_dates = trim((string)$po_sheet->getCellByColumnAndRow(41, $vn_row_num));
 
 			if(strlen($vs_insurance_dates)>0) {
 				$va_insurance_dates = explode(';',$vs_insurance_dates);
@@ -782,8 +796,8 @@ class SanityCheck {
 			$vn_row_num = $o_row->getRowIndex();
 			if($vn_row_num==1) continue; // skip rows with headers
 
-			$vs_object_id = trim((string)$po_sheet->getCellByColumnAndRow(0, $vn_row_num));
-			$vs_collection_idno = trim((string)$po_sheet->getCellByColumnAndRow(55, $vn_row_num));
+			$vs_object_id = trim((string)$po_sheet->getCellByColumnAndRow(1, $vn_row_num));
+			$vs_collection_idno = trim((string)$po_sheet->getCellByColumnAndRow(56, $vn_row_num));
 
 			if(strlen($vs_collection_idno)>0){
 
@@ -831,21 +845,21 @@ class SanityCheck {
 	 * Helper für aktuelles Level in der Keyword-Tabelle
 	 */
 	static public function checkKeyWordTableLevel($po_sheet, $pn_singular_col, $pn_row_id) {
-		$vs_name_singular = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col, $pn_row_id));
+		$vs_name_singular = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+1, $pn_row_id));
 
 		if(strlen($vs_name_singular)>0) { // es gibt Daten in dieser Ebene -> Singular, Plural, idno werden Pflicht
-			$vs_name_plural = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+1, $pn_row_id));
+			$vs_name_plural = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+2, $pn_row_id));
 
 			if(strlen($vs_name_plural)<1) {
-				$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($pn_singular_col+1);
+				$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($pn_singular_col+2);
 				self::addError("Plausibilitätscheck [Schlagworte speziell]: Bei Schlagwort-Importen müssen für alle Einträge, die Daten in bestimmten Ebenen enthalten, Singular, Plural und IDNO ausgefüllt sein. In Zeile {$pn_row_id} ist dies nicht der Fall (Spalte {$vs_col}).");
 				return false;
 			}
 
-			$vs_idno = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+2, $pn_row_id));
+			$vs_idno = trim((string)$po_sheet->getCellByColumnAndRow($pn_singular_col+3, $pn_row_id));
 
 			if(strlen($vs_idno)<1) {
-				$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($pn_singular_col+2);
+				$vs_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($pn_singular_col+3);
 				self::addError("Plausibilitätscheck [Schlagworte speziell]: Bei Schlagwort-Importen müssen für alle Einträge, die Daten in bestimmten Ebenen enthalten, Singular, Plural und IDNO ausgefüllt sein. In Zeile {$pn_row_id} ist dies nicht der Fall (Spalte {$vs_col}).");
 				return false;
 			}

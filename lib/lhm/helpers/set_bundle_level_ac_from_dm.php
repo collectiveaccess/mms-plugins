@@ -20,9 +20,9 @@ require_once(__CA_MODELS_DIR__.'/ca_user_roles.php');
 $va_mms_tables = array('ca_objects', 'ca_entities', 'ca_occurrences', 'ca_collections', 'ca_object_lots', 'ca_storage_locations', 'ca_loans', 'ca_object_representations', 'ca_representation_annotations');
 $va_bundle_list = array();
 $t_screen = new ca_editor_ui_screens();
-$o_dm = Datamodel::load();
+
 foreach($va_mms_tables as $vs_table) {
-	$t_instance = $o_dm->getInstanceByTableName($vs_table, true);
+	$t_instance = Datamodel::getInstanceByTableName($vs_table, true);
 
 	$va_available_bundles = $t_screen->getAvailableBundles($vs_table);
 	foreach($va_available_bundles as $vs_bundle_name => $va_bundle_info) {

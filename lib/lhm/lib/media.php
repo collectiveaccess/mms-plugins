@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 require_once(__CA_MODELS_DIR__.'/ca_objects.php');
 require_once(__CA_MODELS_DIR__.'/ca_object_representations.php');
-require_once(__CA_LIB_DIR__."/ca/Search/ObjectSearch.php");
+require_once(__CA_LIB_DIR__."/Search/ObjectSearch.php");
 # ---------------------------------------------------------------------
 function media_import($ps_xlsx, $ps_dir, $pb_uuid=false) {
 	if(!mmsMediaAndArchiveDirsAreWritable()){

@@ -45,17 +45,14 @@
                 $va_errors[] = 'Es handelt sich nicht um eine Textdatei';
             }
 
-            $t_object = new ca_objects();
-            // Seth
-            $t_loc = new ca_storage_locations();
-
-            $o_parser = new DelimitedDataParser(';','');
+            $o_parser = new DelimitedDataParser(';');
             if(!$o_parser->parse($va_file['tmp_name'], ['format' => 'txt'])){
                 $va_errors[] = 'Konnte Datei nicht verarbeiten. Nicht im korrekten Format?';
             }
 
             while($o_parser->nextRow()) {
-                $vs_location_idno = $o_parser->getRowValue(1);
+                $vs_location_idno = trim($o_parser->getRowValue(1));
+                if(!$vs_location_idno) { continue; }
                 if(substr($vs_location_idno, 0, 1)=="$"){
                     $vs_location_idno = substr($vs_location_idno, 1);
                 }
@@ -67,17 +64,16 @@
                     $va_errors[] = "Konnte Datum {$vs_datetime} nicht verarbeiten";
                 }
 
-                if(!$t_loc->load(array('idno' => $vs_location_idno))) {
+                if(!ca_storage_locations::findAsInstance(['idno' => $vs_location_idno])) {
                     $va_errors[] = "Konnte Standort {$vs_location_idno} nicht finden";
                 }
 
-                if(!$t_object->load($vs_object_id)) {
-                    $va_errors[] = "Konnte Objekt {$vs_object_id} fÃ¼r nicht finden";
+                if(!($t_object = ca_objects::findAsInstance(['object_id' => $vs_object_id]))){
+                    $va_errors[] = "Konnte Objekt {$vs_object_id} nicht finden";
                 }
             }
 
             $va_report = array();
-
             // Starte den Import nur dann, wenn alles vorher gut ging
             if(sizeof($va_errors)==0) {
                 $o_tx = new Transaction($t_object->getDb());
@@ -103,10 +99,9 @@
 
                     $vs_datetime = $o_parser->getRowValue(3);
 
-                    $t_loc->load(array('idno' => $vs_location_idno));
-                    $t_object->load($vs_object_id);
+                    if(!($t_loc = ca_storage_locations::findAsInstance(['idno' => $vs_location_idno]))) { continue; }
+                    if(!($t_object = ca_objects::findAsInstance(['object_id' => $vs_object_id]))){ continue; }
 
-                    $t_object->setMode(ACCESS_WRITE);
                     $t_rel = $t_object->addRelationship('ca_storage_locations', $t_loc->getPrimaryKey(), $vs_rel_type_code, $vs_datetime);
                     if($t_rel instanceof BaseRelationshipModel) {
                         $t_rel->setTransaction($o_tx);
@@ -125,8 +120,6 @@
                             }
                         }
                     }
-
-                    $t_object->setMode(ACCESS_READ);
 
                     if($t_object->numErrors()>0){
                         $va_errors = array_merge($va_errors,$t_object->getErrors());

@@ -65,8 +65,10 @@ function mmsGetCurrentUserDisplayName() {
 
 function mmsExtractFloatFromCurrencyValue($ps_value) {
 	$va_matches = array();
-	if(preg_match("!^([\d\.\,]+)([^\d]+)$!",$ps_value,$va_matches)) {
+	if(preg_match("!^([\d\.\,]+)([^\d]+)$!u",$ps_value,$va_matches)) {
 		$vs_decimal = $va_matches[1];
+	} elseif(preg_match("!^([^\d]+)([\d\.\,]+)$!u",$ps_value,$va_matches)) {
+		$vs_decimal = $va_matches[2];
 	}
 
 	if(Zend_Registry::isRegistered("Zend_Locale")) {
@@ -74,7 +76,7 @@ function mmsExtractFloatFromCurrencyValue($ps_value) {
 	} else {
 		$o_locale = new Zend_Locale('de_DE');
 	}
-
+	
 	try {
 		return (float) Zend_Locale_Format::getNumber($vs_decimal, array('locale' => $o_locale, 'precision' => 2));
 	} catch (Zend_Locale_Exception $e){

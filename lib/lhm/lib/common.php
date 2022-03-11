@@ -146,9 +146,8 @@ function mmsGetRelTypeCodeByLabel($ps_rel_table,$ps_label) {
 	if(MemoryCache::contains($ps_rel_table.':'.$ps_label, 'MMSRelTypeCodesByLabel')) {
 		return MemoryCache::fetch($ps_rel_table.':'.$ps_label, 'MMSRelTypeCodesByLabel');
 	}
-	$o_dm = Datamodel::load();
 	$o_db = mmsGetReusableDbInstance();
-	$t_instance = $o_dm->getInstanceByTableName($ps_rel_table);
+	$t_instance = Datamodel::getInstanceByTableName($ps_rel_table);
 	if($t_instance){
 		$vn_table_num = $t_instance->tableNum();
 
