@@ -258,23 +258,62 @@ class AdminToolsController extends ActionController {
 
 		$o_db = new Db();
 
-		$qr_media = $o_db->query('SELECT representation_id FROM ca_object_representations WHERE deleted=0 ORDER BY representation_id ASC');
-		$va_media_list = [];
+		// $qr_media = $o_db->query('SELECT representation_id FROM ca_object_representations WHERE deleted=0 ORDER BY representation_id ASC');
+// 		$va_media_list = [];
+// 
+// 		if($o_res = caMakeSearchResult('ca_object_representations', $qr_media->getAllFieldValues('representation_id'))) {
+// 			while($o_res->nextHit()) {
+// 				foreach([
+// 							'ca_objects.object_id',
+// 							'ca_object_lots.lot_id', 'ca_entities.entity_id',
+// 							'ca_collections.collection_id', 'ca_occurrences.occurrence_id',
+// 							'ca_storage_locations.location_id', 'ca_loans.loan_id'
+// 						] as $vs_key) {
+// 					if(sizeof($o_res->get($vs_key, ['returnAsArray' => true]))) {
+// 						continue 2; // continue if it's not orphaned
+// 					}
+// 				}
+// 
+// 				// if we reach this point, it's orphaned, so add to list
+// 				$va_media_list[$o_res->get('ca_object_representations.representation_id')] = [
+// 					'thumbnail' => $o_res->get('ca_object_representations.media.thumbnail'),
+// 					'representation_id' => $o_res->get('ca_object_representations.representation_id'),
+// 					'original_filename' => $o_res->get('ca_object_representations.original_filename')
+// 				];
+// 			}
+// 		}
 
-		if($o_res = caMakeSearchResult('ca_object_representations', $qr_media->getAllFieldValues('representation_id'))) {
-			while($o_res->nextHit()) {
-				foreach([
-							'ca_objects.object_id',
-							'ca_object_lots.lot_id', 'ca_entities.entity_id',
-							'ca_collections.collection_id', 'ca_occurrences.occurrence_id',
-							'ca_storage_locations.location_id', 'ca_loans.loan_id'
-						] as $vs_key) {
-					if(sizeof($o_res->get($vs_key, ['returnAsArray' => true]))) {
-						continue 2; // continue if it's not orphaned
-					}
+		$rel_tables = [
+			'ca_objects_x_object_representations', 'ca_object_representations_x_entities',
+			'ca_object_lots_x_object_representations', 'ca_object_representations_x_collections',
+			'ca_object_representations_x_occurrences', 'ca_object_representations_x_storage_locations',
+			'ca_loans_x_object_representations'
+		];
+		
+		$orphans_by_table = [];
+		$acc = null;
+		foreach($rel_tables as $rt) {
+			$in_sql = null; $params = [];
+			
+			if($acc) { 
+				$in_sql = ' representation_id IN (?) AND ';
+				$params[] = $acc;
+			}
+			$qr = $o_db->query($z="SELECT representation_id FROM ca_object_representations WHERE {$in_sql} representation_id NOT IN (SELECT representation_id FROM {$rt}) AND deleted = 0;", $params);
+
+			if($qr && ($qr->numRows() > 0)) {
+				$orphans = $qr->getAllFieldValues('representation_id');
+				if(!$acc) { 
+					$acc = $orphans; 
+				} else {
+					$acc = array_intersect($acc, $orphans);
 				}
-
-				// if we reach this point, it's orphaned, so add to list
+			}
+		}
+		
+		$va_media_list = [];
+		if (sizeof($acc) && ($o_res = caMakeSearchResult('ca_object_representations', $acc))) {
+			while($o_res->nextHit()) {
 				$va_media_list[$o_res->get('ca_object_representations.representation_id')] = [
 					'thumbnail' => $o_res->get('ca_object_representations.media.thumbnail'),
 					'representation_id' => $o_res->get('ca_object_representations.representation_id'),
@@ -282,7 +321,6 @@ class AdminToolsController extends ActionController {
 				];
 			}
 		}
-
 		$this->getView()->setVar('orphaned_media_list', $va_media_list);
 
 		$this->render('orphaned_media_list_html.php');
