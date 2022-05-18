@@ -34,7 +34,7 @@ function media_import($ps_xlsx, $ps_dir, $pb_uuid=false) {
 
 		// Finde zuzuordnende Objekte ... je nach Modus via UUID Suche oder aus der Objekt-ID Spalte
 		if($pb_uuid) { // UUID
-			$vs_uuid = trim((string)$o_sheet->getCellByColumnAndRow(0, $vn_row_num));
+			$vs_uuid = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
 			$o_search = new ObjectSearch();
 			$o_result = $o_search->search('ca_objects.uuid:"'.$vs_uuid.'"', array('no_cache' => true, 'dontFilterByACL' => true));
 			if($o_result->numHits()<1) {
@@ -48,7 +48,7 @@ function media_import($ps_xlsx, $ps_dir, $pb_uuid=false) {
 				$va_objects[] = $o_result->get('object_id');
 			}
 		} else { // Einfaches ObjektID Mapping
-			$va_objects = array(trim((string)$o_sheet->getCellByColumnAndRow(0, $vn_row_num)));
+			$va_objects = array(trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num)));
 		}
 
 		/// Neues Medium erstellen
@@ -56,11 +56,11 @@ function media_import($ps_xlsx, $ps_dir, $pb_uuid=false) {
 		$t_rep->setMode(ACCESS_WRITE);
 
 		// Dateipfad + Dateiname
-		$vs_file = trim((string)$o_sheet->getCellByColumnAndRow(1, $vn_row_num));
+		$vs_file = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
 		$vs_local_path = mmsGetRealPath($ps_dir.DIRECTORY_SEPARATOR.$vs_file);
 
 		// Medientyp
-		$vs_type = trim((string)$o_sheet->getCellByColumnAndRow(2, $vn_row_num));
+		$vs_type = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
 		$vs_type = mmsGetListItemIDByLabel('object_representation_types',$vs_type);
 
 		if(!$vs_type) {
@@ -70,7 +70,7 @@ function media_import($ps_xlsx, $ps_dir, $pb_uuid=false) {
 		}
 
 		// Status
-		$vs_status = trim((string)$o_sheet->getCellByColumnAndRow(3, $vn_row_num));
+		$vs_status = trim((string)$o_sheet->getCellByColumnAndRow(4, $vn_row_num));
 		$vs_status = mmsGetListItemValueByLabel('workflow_statuses',$vs_status);
 
 		if(!$vs_status) {
