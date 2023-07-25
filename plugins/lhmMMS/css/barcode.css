@@ -8,27 +8,27 @@ body {
 	font-weight: bold;
 
 	position: absolute;
-	width: 200px;
+	width: 150px;
 	height: 53px;
 	left: 2px;
-	top: -30px;
+	top: -33px;
 }
 
 #idno {
-	font-size: 15px;
+	font-size: 11px;
 	position: absolute;
 	overflow: hidden;
 	font-weight: bold;
 	left: 2px;
 	height: 20px;
 	width: 200px;
-	top: 29px;
+	top: 22px;
 }
 
 #barcode {
 	position: absolute;
-	left: -5px;
-	top: 45px;
+	left: 2px;
+	top: 38px;
 }
 
 #object_id {
@@ -36,7 +36,7 @@ body {
 	width: 50px;
 	left: 2px;
 	top: 63px;
-	font-size:10px;
+	font-size:8px;
 }
 
 #date {
@@ -45,4 +45,19 @@ body {
 	left: 98px;
 	top: 63px;
 	font-size:10px;
+}
+#buchungskreis {
+	position: absolute;
+	width: 50px;
+	left: 2px;
+	top: 80px;
+	font-size: 9px;
+}
+
+#eigentuemer {
+	position: absolute;
+	width: 250px;
+	left: 50px;
+	top: 80px;
+	font-size: 9px;
 }
