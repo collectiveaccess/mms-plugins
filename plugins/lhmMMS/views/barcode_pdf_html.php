@@ -1,6 +1,8 @@
 <?php
 	$t_object = $this->getVar('t_object');
 	$vs_barcode_file = $this->getVar('barcode_file');
+	$eigentuemer = $this->getVar('eigentuemer');
+	$buchungskreis = $this->getVar('buchungskreis');
 
 	// mmsd001.stm.kul.muenchen.de/index.php/lhmMMS/BarcodeLabel/Index/object_id/10081591/format/attach
 ?>
@@ -23,6 +25,10 @@
 			
 			<div id='object_id'><?php print $t_object->getPrimaryKey(); ?></div>
 			<div id='date'><?php print date("d.m.Y"); ?></div>
+
+						<div id='buchungskreis'><?php print $buchungskreis; ?></div>
+		            <div id='eigentuemer'><?php print $eigentuemer; ?></div>
+
 		</div>
 	</body>
 </html>
