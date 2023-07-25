@@ -39,12 +39,33 @@ class BarcodeLabelController extends ActionController {
 		}
 
 		// generate Barcode
-		$bc = caGenerateBarcode("{$vn_object_id}", ['type' => 'code128', 'height' => '16px']);
+		$bc = caGenerateBarcode("{$vn_object_id}", ['type' => 'code128', 'height' => '20px']);
+
+		// Eigentümer von dem Objekt ermitteln
+		$lots_id = $t_object->get('lot_id'); // laden des lot id von objects
+		$lot_object = new ca_object_lots($lots_id); // laden des dazu gehörigen lot objects
+		$booking_area = $lot_object->get('sap'); // laden der Nummer des Buchungskreises
+		$booking_area = str_replace(";","",$booking_area); // Bereinigen der Variable
+
+		// Zuweisung der Bezeichnung des Buchungskreises
+		switch($booking_area){
+			case "0227":
+				$et = 'Eigentum der LH München';
+				break;
+			case "0810":
+				$et = 'Eigentum der Münchener Schausteller-Stiftung';
+				break;
+			default:
+				$et = '';
+		}
+
 
 		$va_page_dimensions = array(0,0,4.0*28.346,7.0*28.346);
 
 		$this->getView()->setVar('barcode_file', $bc);
 		$this->getView()->setVar('t_object',$t_object);
+		$this->getView()->setVar('eigentuemer' ,$et);
+		$this->getView()->setVar('buchungskreis', $booking_area);
 
 		$vs_content = $this->render('barcode_pdf_html.php');
 
