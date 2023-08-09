@@ -51,8 +51,8 @@ class BarcodeLabelController extends ActionController {
 			case "0227":
 				$et = 'Eigentum der LH München';
 				break;
-			case "0810":
-				$et = 'Eigentum der Münchener Schausteller-Stiftung';
+			case "8010":
+				$et = 'Eigentum der Münchener <br>Schausteller-Stiftung';
 				break;
 			default:
 				$et = '';
