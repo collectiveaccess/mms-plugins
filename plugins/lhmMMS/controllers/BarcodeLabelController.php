@@ -44,19 +44,19 @@ class BarcodeLabelController extends ActionController {
 		// Eigentümer von dem Objekt ermitteln
 		$lots_id = $t_object->get('lot_id'); // laden des lot id von objects
 		$lot_object = new ca_object_lots($lots_id); // laden des dazu gehörigen lot objects
-		$booking_area = $lot_object->get('sap'); // laden der Nummer des Buchungskreises
-		$booking_area = str_replace(";","",$booking_area); // Bereinigen der Variable
+		$booking_area = $lot_object->get('ca_object_lots.sap.sap_accounting_area'); // laden der Nummer des Buchungskreises
 
 		// Zuweisung der Bezeichnung des Buchungskreises
 		switch($booking_area){
 			case "0227":
 				$et = 'Eigentum der LH München';
 				break;
-			case "0810":
-				$et = 'Eigentum der Münchener Schausteller-Stiftung';
+			case "8010":
+				$et = 'Eigentum der Münchener <br>Schausteller-Stiftung';
 				break;
 			default:
 				$et = '';
+				$booking_area = '';
 		}
 
 
