@@ -70,6 +70,7 @@ $va_relative_stats = $this->getVar('relative_stats');
 	</table>
 	<p style="font-size: 10px">* Schätzung. Bezieht nicht alle automatisch erstellten Derivate mit ein.</p>
 
+	<!-- KULTMMS-737: Disabling absolute stats in Front-End
 	<h3>Absolute Statistik</h3>
 	<table id="mmsAbsoluteStatsList" class="listtable" width="100%" border="0" cellpadding="0" cellspacing="1">
 		<thead>
@@ -80,20 +81,21 @@ $va_relative_stats = $this->getVar('relative_stats');
 		</thead>
 		<tbody>
 <?php
-		foreach($va_absolute_stats as $vs_name => $vm_val) {
+		//foreach($va_absolute_stats as $vs_name => $vm_val) {
 ?>
 		<tr>
 			<td>
-				<?php print $vs_name; ?>
+				<?php //print $vs_name; ?>
 			</td>
 			<td>
-				<?php print $vm_val; ?>
+				<?php //print $vm_val; ?>
 			</td>
 		</tr>
 <?php
-		}
+		//}
 ?>
 		</tbody>
 	</table>
+	-->
 </div>
 <div class="editorBottomPadding"><!-- empty --></div>
