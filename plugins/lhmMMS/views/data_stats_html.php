@@ -26,7 +26,8 @@
  * ----------------------------------------------------------------------
  */
 
-$va_absolute_stats = $this->getVar('absolute_stats');
+// KULTMMS-737: Disabling absolute stats in Front-End
+//$va_absolute_stats = $this->getVar('absolute_stats');
 $va_relative_stats = $this->getVar('relative_stats');
 
 ?>

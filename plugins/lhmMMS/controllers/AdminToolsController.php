@@ -331,7 +331,8 @@ class AdminToolsController extends ActionController {
 			$ps_date_range = 'heute';
 		}
 
-		$this->getView()->setVar('absolute_stats', self::getAbsoluteStats());
+		// KULTMMS-737: Disabling absolute stats in Front-End
+		//$this->getView()->setVar('absolute_stats', self::getAbsoluteStats());
 
 		$o_tep = new TimeExpressionParser(null, 'de_DE');
 		if(!$o_tep->parse($ps_date_range)) {
