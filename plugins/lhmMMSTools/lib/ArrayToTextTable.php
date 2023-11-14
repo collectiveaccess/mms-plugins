@@ -134,7 +134,7 @@ class ArrayToTextTable
         $vs_buf .= $this->pcen;
         foreach($this->cs as $key => $val)
             $vs_buf .= $this->prow .
-				mb_str_pad('', $val, $this->prow, STR_PAD_RIGHT) .
+				$this->mb_str_pad('', $val, $this->prow, STR_PAD_RIGHT) .
                 $this->prow .
                 $this->pcen;
         if($nl) $vs_buf .= "\n";
@@ -150,7 +150,7 @@ class ArrayToTextTable
         $vs_buf .= $this->pcol;
         foreach($this->cs as $key => $val)
             $vs_buf .= ' '.
-                mb_str_pad($this->head[$key], $val, ' ', STR_PAD_BOTH) .
+                $this->mb_str_pad($this->head[$key], $val, ' ', STR_PAD_BOTH) .
                 ' ' .
                 $this->pcol;
 
@@ -169,7 +169,7 @@ class ArrayToTextTable
             for($colKey=0; $colKey < count($this->keys); $colKey++)
             { 
                 $vs_buf .=" ";
-                $vs_buf .=mb_str_pad(substr($this->rows[$rowKey][$this->keys[$colKey]], ($this->mW * ($line-1)), $this->mW), $this->cs[$colKey], ' ', STR_PAD_RIGHT);
+                $vs_buf .=$this->mb_str_pad(substr($this->rows[$rowKey][$this->keys[$colKey]], ($this->mW * ($line-1)), $this->mW), $this->cs[$colKey], ' ', STR_PAD_RIGHT);
                 $vs_buf .=" " . $this->pcol;
             }  
             $vs_buf .= "\n";
@@ -195,9 +195,11 @@ class ArrayToTextTable
         if($rowKey !== false && (!isset($this->rs[$rowKey]) || $this->rs[$rowKey] < $h))
             $this->rs[$rowKey] = $h;
     }
-}
-
-function mb_str_pad($input, $pad_length, $pad_string, $pad_style, $encoding="UTF-8") {
-	return str_pad($input,
-		strlen($input)-mb_strlen($input,$encoding)+$pad_length, $pad_string, $pad_style);
+	
+	//mb_str_pad changed to a private class function for compatibility with Collective Access 2.0
+	private function mb_str_pad($input, $pad_length, $pad_string, $pad_style, $encoding="UTF-8") 
+	{
+		return str_pad($input,
+			strlen($input)-mb_strlen($input,$encoding)+$pad_length, $pad_string, $pad_style);
+	}
 }
