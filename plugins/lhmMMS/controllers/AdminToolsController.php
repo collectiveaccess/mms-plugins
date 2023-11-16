@@ -85,8 +85,12 @@ class AdminToolsController extends ActionController {
 		}
 
 		$this->getView()->setVar('element_list', $va_elements_for_list);
-		$this->getView()->setVar('attribute_types', CA\Attributes\Attribute::getAttributeTypes());
-
+		if (__CollectiveAccess__ < '2.0') {
+				$this->getView()->setVar('attribute_types', Attribute::getAttributeTypes());
+		} else {
+				$this->getView()->setVar('attribute_types', CA\Attributes\Attribute::getAttributeTypes());
+		}
+		
 		$this->render('elements_list_html.php');
 	}
 	# -------------------------------------------------------
