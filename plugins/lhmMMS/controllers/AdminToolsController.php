@@ -85,7 +85,7 @@ class AdminToolsController extends ActionController {
 		}
 
 		$this->getView()->setVar('element_list', $va_elements_for_list);
-		$this->getView()->setVar('attribute_types', Attribute::getAttributeTypes());
+		$this->getView()->setVar('attribute_types', CA\Attributes\Attribute::getAttributeTypes());
 
 		$this->render('elements_list_html.php');
 	}
