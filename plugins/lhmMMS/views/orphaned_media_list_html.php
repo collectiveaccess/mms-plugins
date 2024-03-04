@@ -35,7 +35,7 @@ $va_orphaned_media_list = $this->getVar('orphaned_media_list');
 
 	<?php
 		print caFormControlBox(
-			'<div class="list-filter">'._t('Filter').': <input type="text" name="filter" value="" onkeyup="$(\'#caOrphanedMediaList\').caFilterTable(this.value); return false;" size="20"/></div>',
+			'<div class="list-filter">'._t('Filter').': <input type="text" id="filter" name="filter" value="" onkeyup="$(\'#caOrphanedMediaList\').caFilterTable(this.value); return false;" size="20"/></div>',
 			'',
 			''
 		);
