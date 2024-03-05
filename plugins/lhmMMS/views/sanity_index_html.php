@@ -26,6 +26,6 @@
 	<hr />
 </div>
 <?php
- 	print caFormSubmitButton($this->request, __CA_NAV_ICON_GO__, "Absenden", 'lhm_sanity_check');
-
+	print str_replace("<span class='form-button'>", "<span class='form-button' id='sanity_check'>", caFormSubmitButton($this->request, __CA_NAV_ICON_GO__, "Absenden", 'lhm_sanity_check'));
+	
 ?>

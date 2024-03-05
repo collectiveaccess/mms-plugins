@@ -20,6 +20,6 @@
 	<hr />
 </div>
 <?php
- 	print caFormSubmitButton($this->request, __CA_NAV_ICON_GO__, "Absenden", 'lhm_depot_import');
-
+	print str_replace("<span class='form-button'>", "<span class='form-button' id='depot_import'>", caFormSubmitButton($this->request, __CA_NAV_ICON_GO__, "Absenden", 'lhm_depot_import'));
+ 	
 ?>

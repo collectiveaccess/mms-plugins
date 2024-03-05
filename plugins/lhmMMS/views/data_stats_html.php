@@ -39,7 +39,7 @@ $va_relative_stats = $this->getVar('relative_stats');
 	print caFormControlBox(
 		'',
 		'',
-		'Zeitraum: '.caHTMLTextInput('data_stats_search', array('size' => 15, 'value' => $this->getVar('data_stats_search') ?: 'heute'))." ".caFormSubmitButton($this->request, __CA_NAV_ICON_SEARCH__, "", 'mmsDataStatsSearch')
+		'Zeitraum: '.str_replace("<input", "<input id='search_field'", caHTMLTextInput('data_stats_search', array('size' => 15, 'value' => $this->getVar('data_stats_search') ?: 'heute')))." ".str_replace("<span class='form-button'>", "<span class='form-button' id='search_button'>", caFormSubmitButton($this->request, __CA_NAV_ICON_SEARCH__, "", 'mmsDataStatsSearch'))
 	);
 	print "</form>";
 	?>
