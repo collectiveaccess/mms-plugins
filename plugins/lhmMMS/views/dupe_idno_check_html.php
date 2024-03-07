@@ -17,7 +17,7 @@
 <div class="sectionBox">
 	<?php
 	print caFormControlBox(
-		'<div class="list-filter">'._t('Filter').': <input type="text" id="filter" name="filter" value="" onkeyup="$(\'#mmsDupeList\').caFilterTable(this.value); return false;" size="20"/></div>',
+		'<div class="list-filter">'._t('Filter').': <input id="lhm_duplicate_check_filter" type="text" name="filter" value="" onkeyup="$(\'#mmsDupeList\').caFilterTable(this.value); return false;" size="20"/></div>',
 		'',
 		$vs_set_type_menu
 	);

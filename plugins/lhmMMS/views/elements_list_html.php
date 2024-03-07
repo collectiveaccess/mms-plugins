@@ -43,7 +43,7 @@ $va_attribute_types = $this->getVar('attribute_types');
 <div class="sectionBox">
 	<?php
 		print caFormControlBox(
-			'<div class="list-filter">'._t('Filter').': <input type="text" name="filter" value="" onkeyup="$(\'#caElementList\').caFilterTable(this.value); return false;" size="20"/></div>',
+			'<div class="list-filter">'._t('Filter').': <input id="lhm_field_values_filter" type="text" name="filter" value="" onkeyup="$(\'#caElementList\').caFilterTable(this.value); return false;" size="20"/></div>',
 			'',
 			''
 		);

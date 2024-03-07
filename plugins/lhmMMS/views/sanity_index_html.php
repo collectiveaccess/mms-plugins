@@ -9,7 +9,7 @@
 	Import-Typ:
 <?php
 
- 	print caHTMLSelect('sanity_type', array(
+ 	print str_replace("<select ", "<select id='lhm_sanity_check_import_type' ", caHTMLSelect('sanity_type', array(
  		'Erwerbungen' => 'lots',
  		'Personen/Institutionen' => 'entities',
  		'Ausstellungen' => 'exhibitions',
@@ -18,14 +18,14 @@
  		'Standorte' => 'storage-locations',
  		'Objekt-Insert' => 'objects',
  		'Objekt-Update' => 'objects-update',
- 	));
+ 	)));
 
 ?>
 	<hr />
-	Zu prüfende Datei: <input type="file" name="data" size="40"> 
+	Zu prüfende Datei: <input id="lhm_sanity_check_file" type="file" name="data" size="40"> 
 	<hr />
 </div>
 <?php
-	print str_replace("<span class='form-button'>", "<span class='form-button' id='sanity_check'>", caFormSubmitButton($this->request, __CA_NAV_ICON_GO__, "Absenden", 'lhm_sanity_check'));
+	print str_replace("<a '>", "<a id='lhm_sanity_check_send' ", caFormSubmitButton($this->request, __CA_NAV_ICON_GO__, "Absenden", 'lhm_sanity_check'));
 	
 ?>
