@@ -3,19 +3,19 @@ body {
 }
 
 #title {
-	font-size: 11px;
+	font-size: 10px;
 	overflow: hidden;
 	font-weight: bold;
 
 	position: absolute;
-	width: 150px;
+	width: 200px;
 	height: 53px;
 	left: 2px;
 	top: -33px;
 }
 
 #idno {
-	font-size: 11px;
+	font-size: 13px;
 	position: absolute;
 	overflow: hidden;
 	font-weight: bold;
@@ -44,8 +44,9 @@ body {
 	width: 50px;
 	left: 98px;
 	top: 63px;
-	font-size:10px;
+	font-size:8px;
 }
+
 #buchungskreis {
 	position: absolute;
 	width: 50px;

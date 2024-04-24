@@ -26,9 +26,8 @@
 			<div id='object_id'><?php print $t_object->getPrimaryKey(); ?></div>
 			<div id='date'><?php print date("d.m.Y"); ?></div>
 
-						<div id='buchungskreis'><?php print $buchungskreis; ?></div>
-		            <div id='eigentuemer'><?php print $eigentuemer; ?></div>
-
+			<div id='buchungskreis'><?php print $buchungskreis; ?></div>
+			<div id='eigentuemer'><?php print $eigentuemer; ?></div>
 		</div>
 	</body>
 </html>

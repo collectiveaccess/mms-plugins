@@ -39,7 +39,7 @@ class BarcodeLabelController extends ActionController {
 		}
 
 		// generate Barcode
-		$bc = caGenerateBarcode("{$vn_object_id}", ['type' => 'code128', 'height' => '20px']);
+		$bc = caGenerateBarcode("{$vn_object_id}", ['type' => 'code128', 'height' => '25px']);
 
 		// Eigentümer von dem Objekt ermitteln
 		$lots_id = $t_object->get('lot_id'); // laden des lot id von objects
@@ -58,7 +58,6 @@ class BarcodeLabelController extends ActionController {
 				$et = '';
 				$booking_area = '';
 		}
-
 
 		$va_page_dimensions = array(0,0,4.0*28.346,7.0*28.346);
 
