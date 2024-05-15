@@ -1,6 +1,6 @@
 # mms-plugins
 
-Update of old CollectiveAccess version 1.6 LHM-MMS plugins for compatibility with version 1.8.
+Update of old CollectiveAccess version 1.6 LHM-MMS plugins for compatibility with versions 2.0 & 1.8.
 
 ## Installing files
 
