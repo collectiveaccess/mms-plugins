@@ -83,9 +83,9 @@ function mmsExtractFloatFromCurrencyValue($ps_value) {
 }
 
 function mmsFloatToCurrencyValue($pn_value){
-	global $locale;
+	global $_locale;
 	
-	$o_locale = $locale ? $locale : new Zend_Locale('de_DE');
+	$o_locale = $_locale ? $_locale : new Zend_Locale('de_DE');
  	$vs_decimal = Zend_Locale_Format::toNumber($pn_value, array('locale' => $o_locale, 'precision' => 2));
 
  	return $vs_decimal.' EUR';
