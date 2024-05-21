@@ -64,6 +64,8 @@ function mmsGetCurrentUserDisplayName() {
 }
 
 function mmsExtractFloatFromCurrencyValue($ps_value) {
+	global $_locale;
+	
 	$va_matches = array();
 	if(preg_match("!^([\d\.\,]+)([^\d]+)$!u",$ps_value,$va_matches)) {
 		$vs_decimal = $va_matches[1];
@@ -71,11 +73,7 @@ function mmsExtractFloatFromCurrencyValue($ps_value) {
 		$vs_decimal = $va_matches[2];
 	}
 
-	if(Zend_Registry::isRegistered("Zend_Locale")) {
-		$o_locale = Zend_Registry::get('Zend_Locale');
-	} else {
-		$o_locale = new Zend_Locale('de_DE');
-	}
+	$o_locale = $_locale ? $_locale : new Zend_Locale('de_DE');
 	
 	try {
 		return (float) Zend_Locale_Format::getNumber($vs_decimal, array('locale' => $o_locale, 'precision' => 2));
@@ -85,9 +83,9 @@ function mmsExtractFloatFromCurrencyValue($ps_value) {
 }
 
 function mmsFloatToCurrencyValue($pn_value){
-	global $locale;
+	global $_locale;
 	
-	$o_locale = $locale ? $locale : new Zend_Locale('de_DE');
+	$o_locale = $_locale ? $_locale : new Zend_Locale('de_DE');
  	$vs_decimal = Zend_Locale_Format::toNumber($pn_value, array('locale' => $o_locale, 'precision' => 2));
 
  	return $vs_decimal.' EUR';
