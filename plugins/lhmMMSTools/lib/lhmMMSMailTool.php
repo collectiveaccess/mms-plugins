@@ -39,7 +39,7 @@ require_once(__CA_LIB_DIR__.'/ModelSettings.php');
 require_once(__CA_MODELS_DIR__.'/ca_locales.php');
 require_once(__CA_MODELS_DIR__.'/ca_objects.php');
 require_once(__CA_APP_DIR__ . '/plugins/lhmMMS/controllers/AdminToolsController.php');
-require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToTextTable.php');
+require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToHTMLTextTable.php');
  
 	class lhmMMSMailTool extends BaseApplicationTool {
 		# -------------------------------------------------------
@@ -93,31 +93,42 @@ require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToTextTable.php');
 
 			$o_tep = new TimeExpressionParser("{$vs_from_date} - {$vs_to_date}", 'de_DE');
 			$va_t = $o_tep->getUnixTimestamps();
-
+            
+            //Headline with daterange
 			$vs_body_text = $o_conf->get('template');
 			$vs_body_text = str_replace('{date_range}', date('d.m.Y H:i', $va_t['start']) . ' - ' . date('d.m.Y H:i', $va_t['end']), $vs_body_text);
-
-			$va_current_stats = [];
+            
+             /*
+             * Relative Stats
+             * */
+            $va_current_stats = [];
 			foreach(AdminToolsController::getRelativeStats($va_t) as $vs_cat => $vs_val) {
-				$va_current_stats[] = ['kategorie' => $vs_cat, 'wert' => $vs_val];
+				$va_current_stats[] = ['Kategorie' => $vs_cat, 'Wert' => $vs_val];
 			}
+            //Convert va_current_stats to HTML Table
+            $tableGenerator = new ArrayToHTMLTable();
+            $va_current_stats_table = $tableGenerator->convert($va_current_stats);
+            
+            //Replace template placeholders with the matching HTML table for relative stats
+            $vs_body_text = str_replace('{relative_stats}', $va_current_stats_table, $vs_body_text);
 
-			$o_array_to_table = new ArrayToTextTable($va_current_stats);
-			$o_array_to_table->showHeaders(true);
-			$vs_current_stats = @$o_array_to_table->render(true);
-
-			$va_absolute_stats = [];
-			foreach(AdminToolsController::getAbsoluteStats() as $vs_cat => $vs_val) {
-				$va_absolute_stats[] = ['kategorie' => $vs_cat, 'wert' => $vs_val];
+            /*
+             * Absolute Stats
+             * */
+            foreach(AdminToolsController::getAbsoluteStats() as $vs_cat => $vs_val) {
+				$va_absolute_stats[] = ['Kategorie' => $vs_cat, 'Wert' => $vs_val];
 			}
+            //Convert absolute stats to HTML Table
+            $tableGenerator = new ArrayToHTMLTable();
+            $va_absolute_stats_table = $tableGenerator->convert($va_absolute_stats);
+            
+            //Replace template placeholders with the matching HTML table for relative stats
+			$vs_body_text = str_replace('{absolute_stats}', $va_absolute_stats_table, $vs_body_text);
 
-			$o_array_to_table = new ArrayToTextTable($va_absolute_stats);
-			$o_array_to_table->showHeaders(true);
-			$vs_absolute_stats = @$o_array_to_table->render(true);
+            
+            //sendmail
+            caSendmail($va_actual_emails, $o_conf->get('from'), $o_conf->get('subject'), $vs_body_text);
 
-			$vs_body_text = str_replace('{relative_stats}', $vs_current_stats, $vs_body_text);
-			$vs_body_text = str_replace('{absolute_stats}', $vs_absolute_stats, $vs_body_text);
-			caSendmail($va_actual_emails, $o_conf->get('from'), $o_conf->get('subject'), $vs_body_text);
 		}
 		# -------------------------------------------------------
 		# Help
