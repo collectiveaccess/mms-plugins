@@ -39,7 +39,7 @@ require_once(__CA_LIB_DIR__.'/ModelSettings.php');
 require_once(__CA_MODELS_DIR__.'/ca_locales.php');
 require_once(__CA_MODELS_DIR__.'/ca_objects.php');
 require_once(__CA_APP_DIR__ . '/plugins/lhmMMS/controllers/AdminToolsController.php');
-require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToHTMLTextTable.php');
+require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToHTMLTable.php');
  
 	class lhmMMSMailTool extends BaseApplicationTool {
 		# -------------------------------------------------------
