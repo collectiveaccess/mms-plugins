@@ -124,10 +124,25 @@ require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToHTMLTable.php');
             
             //Replace template placeholders with the matching HTML table for relative stats
 			$vs_body_text = str_replace('{absolute_stats}', $va_absolute_stats_table, $vs_body_text);
+		
+            // new line von Header
+            // Header für die E-Mail
+            $headers = "MIME-Version: 1.0" . "\r\n";
+            $headers .= "Content-type: text/html; charset=UTF-8" . "\r\n";  // HTML-MIME-Typ
+            $headers .= "From: " . $o_conf->get('from') . "\r\n";  // Absender
+            $headers .= "Reply-To: " . $o_conf->get('from') . "\r\n";  // Optional: Reply-To Header
 
-            
-            //sendmail
-            caSendmail($va_actual_emails, $o_conf->get('from'), $o_conf->get('subject'), $vs_body_text);
+
+
+            // send E-Mail
+            if (!mail(implode(",", $va_actual_emails), $o_conf->get('subject'), $vs_body_text, $headers)) {
+               echo "Die E-Mail konnte nicht gesendet werden!";
+            }
+            else {
+               echo "Die E-Mail wurde erfolgreich gesendet!";
+            }
+
+            //end sendmail
 
 		}
 		# -------------------------------------------------------

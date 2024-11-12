@@ -51,6 +51,13 @@ class ArrayToTextTable
      */
     public function ArrayToTextTable($rows)
     {
+        // Check if $rows is an array and not empty
+        if (!is_array($rows) || empty($rows)) {
+            // Handle the error or set $this->rows to an empty array
+            $this->rows = [];
+            return false; // Or handle accordingly
+        }
+
         $this->rows =& $rows;
         $this->cs=array();
         $this->rs=array();
