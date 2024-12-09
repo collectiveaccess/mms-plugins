@@ -131,12 +131,10 @@ require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToHTMLTable.php');
             $headers .= "Content-type: text/html; charset=UTF-8" . "\r\n";
             $headers .= "From: " . $o_conf->get('from') . "\r\n";
             $headers .= "Reply-To: " . $o_conf->get('from') . "\r\n";
-
             // Normalize whitespace in the email body
               $vs_body_text = preg_replace('/\s+/', ' ', $vs_body_text);
               $vs_body_text = trim($vs_body_text);
 
-                  
             // send E-Mail
             if (!mail(implode(",", $va_actual_emails), $o_conf->get('subject'), $vs_body_text, $headers)) {
                echo "Die E-Mail konnte nicht gesendet werden!";

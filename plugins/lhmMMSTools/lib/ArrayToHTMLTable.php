@@ -9,7 +9,7 @@ class ArrayToHTMLTable {
 
         // Check if the array is empty
         if (empty($array)) {
-            $html .= "<tr><td colspan=\"100%\" style=\"border: 1px solid #dddddd; padding:0px 8px;\">No data available</td></tr>";
+            $html .= "<tr><td colspan=\"100%\" style=\"border: 1px solid #dddddd;padding:0px 8px;\">No data available</td></tr>";
             $html .= "</table>";
             return $html;
         }
@@ -36,7 +36,7 @@ class ArrayToHTMLTable {
         $headers = array_keys(reset($array));
 
         foreach ($headers as $header) {
-            $html .= "<th style=\"border: 1px solid #dddddd; padding:0px 8px; background-color: #f2f2f2; text-align: left;\">" . htmlspecialchars($header) . "</th>";
+            $html .= "<th style=\"border: 1px solid #dddddd;padding:0px 8px; background-color: #f2f2f2; text-align: left;\">" . htmlspecialchars($header) . "</th>";
         }
 
         $html .= "</tr></thead>";
@@ -53,9 +53,9 @@ class ArrayToHTMLTable {
             foreach ($row as $cell) {
                 if (is_array($cell)) {
                     // Handle nested arrays
-                    $html .= "<td style=\"border: 1px solid #dddddd; padding:0px 8px;\">" . $this->convert($cell) . "</td>";
+                    $html .= "<td style=\"border: 1px solid #dddddd;padding:0px 8px;\">" . $this->convert($cell) . "</td>";
                 } else {
-                    $html .= "<td style=\"border: 1px solid #dddddd; padding:0px 8px;\">" . htmlspecialchars($cell) . "</td>";
+                    $html .= "<td style=\"border: 1px solid #dddddd;padding:0px 8px;\">" . htmlspecialchars($cell) . "</td>";
                 }
             }
             $html .= "</tr>";
