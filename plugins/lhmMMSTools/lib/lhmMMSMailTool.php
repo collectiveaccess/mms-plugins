@@ -126,14 +126,17 @@ require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToHTMLTable.php');
 			$vs_body_text = str_replace('{absolute_stats}', $va_absolute_stats_table, $vs_body_text);
 		
             // new line von Header
-            // Header für die E-Mail
+            // Header for E-Mail
             $headers = "MIME-Version: 1.0" . "\r\n";
-            $headers .= "Content-type: text/html; charset=UTF-8" . "\r\n";  // HTML-MIME-Typ
-            $headers .= "From: " . $o_conf->get('from') . "\r\n";  // Absender
-            $headers .= "Reply-To: " . $o_conf->get('from') . "\r\n";  // Optional: Reply-To Header
+            $headers .= "Content-type: text/html; charset=UTF-8" . "\r\n";
+            $headers .= "From: " . $o_conf->get('from') . "\r\n";
+            $headers .= "Reply-To: " . $o_conf->get('from') . "\r\n";
 
+            // Normalize whitespace in the email body
+              $vs_body_text = preg_replace('/\s+/', ' ', $vs_body_text);
+              $vs_body_text = trim($vs_body_text);
 
-
+                  
             // send E-Mail
             if (!mail(implode(",", $va_actual_emails), $o_conf->get('subject'), $vs_body_text, $headers)) {
                echo "Die E-Mail konnte nicht gesendet werden!";
@@ -142,7 +145,7 @@ require_once(__CA_APP_DIR__ . '/plugins/lhmMMSTools/lib/ArrayToHTMLTable.php');
                echo "Die E-Mail wurde erfolgreich gesendet!";
             }
 
-            //end sendmail
+            //end send E-Mail
 
 		}
 		# -------------------------------------------------------

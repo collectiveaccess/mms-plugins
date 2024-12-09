@@ -438,7 +438,7 @@ class AdminToolsController extends ActionController {
 			}
 		}
 
-		$va_relative_stats['Speicherplatzbelegung durch Medien*'] = caHumanFilesize($vn_bytes);
+		$va_relative_stats['Speicherplatzbelegung durch Medien'] = caHumanFilesize($vn_bytes);
 
 		return $va_relative_stats;
 	}
