@@ -51,6 +51,7 @@ class lhmMMSPlugin extends BaseApplicationPlugin {
 	public function hookAfterBundleInsert(&$pa_params) { $this->reroute(__FUNCTION__,$pa_params); }
 	public function hookSaveItem(&$pa_params) { $this->reroute(__FUNCTION__,$pa_params); }
 	public function hookBeforeMoveRelationships(&$pa_params) { $this->reroute(__FUNCTION__,$pa_params); }
+	public function hookBeforeSaveItem(&$pa_params) {$this->reroute(__FUNCTION__, $pa_params);}
 	# -------------------------------------------------------
 	private function reroute($ps_hook_name,&$pa_params) {
 		if(isset($this->opa_hook_registry[$ps_hook_name]) && is_array($this->opa_hook_registry[$ps_hook_name])){
