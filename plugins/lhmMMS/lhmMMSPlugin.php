@@ -8,17 +8,20 @@
  * Copyright 2014 Landeshauptstadt München
  * ----------------------------------------------------------------------
  */
-require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'mmsHelpers.php');
-require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'MMSStorageLocationManagement.php');
-require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'MMSCollectionManagement.php');
-require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'MMSInsuranceFeatures.php');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'mmsHelpers.php');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'MMSStorageLocationManagement.php');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'MMSCollectionManagement.php');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'MMSInsuranceFeatures.php');
 
-class lhmMMSPlugin extends BaseApplicationPlugin {
+class lhmMMSPlugin extends BaseApplicationPlugin
+{
 	# -------------------------------------------------------
 	private $opo_datamodel;
 	private $opa_relationships_to_edit = array();
+
 	# -------------------------------------------------------
-	public function __construct($ps_plugin_path) {
+	public function __construct($ps_plugin_path)
+	{
 		$this->description = _t('Zusatzfunktionalität für LHM MMS');
 		parent::__construct();
 
@@ -27,10 +30,12 @@ class lhmMMSPlugin extends BaseApplicationPlugin {
 		$this->opo_datamodel = Datamodel::load();
 	}
 	# -------------------------------------------------------
+
 	/**
 	 * Override checkStatus() to return true - the MMS plugin always initializes ok
 	 */
-	public function checkStatus() {
+	public function checkStatus()
+	{
 		return array(
 			'description' => $this->getDescription(),
 			'errors' => array(),
@@ -47,18 +52,45 @@ class lhmMMSPlugin extends BaseApplicationPlugin {
 	 * through __call is unfortunately not sufficient.
 	 */
 	# -------------------------------------------------------
-	public function hookAddRelationship(&$pa_params) { $this->reroute(__FUNCTION__,$pa_params); }
-	public function hookAfterBundleInsert(&$pa_params) { $this->reroute(__FUNCTION__,$pa_params); }
-	public function hookSaveItem(&$pa_params) { $this->reroute(__FUNCTION__,$pa_params); }
-	public function hookBeforeMoveRelationships(&$pa_params) { $this->reroute(__FUNCTION__,$pa_params); }
-	public function hookBeforeSaveItem(&$pa_params) {$this->reroute(__FUNCTION__, $pa_params);}
+	public function hookAddRelationship(&$pa_params)
+	{
+		$this->reroute(__FUNCTION__, $pa_params);
+	}
+
+	public function hookAfterBundleInsert(&$pa_params)
+	{
+		$this->reroute(__FUNCTION__, $pa_params);
+	}
+
+	public function hookSaveItem(&$pa_params)
+	{
+		$this->reroute(__FUNCTION__, $pa_params);
+	}
+
+	public function hookBeforeMoveRelationships(&$pa_params)
+	{
+		$this->reroute(__FUNCTION__, $pa_params);
+	}
+
+	public function hookBeforeSaveItem(&$pa_params)
+	{
+		$this->reroute(__FUNCTION__, $pa_params);
+	}
+
+	public function hookEditItem(&$pa_params)
+	{
+		$this->reroute(__FUNCTION__, $pa_params);
+	}
+
+
 	# -------------------------------------------------------
-	private function reroute($ps_hook_name,&$pa_params) {
-		if(isset($this->opa_hook_registry[$ps_hook_name]) && is_array($this->opa_hook_registry[$ps_hook_name])){
-			foreach($this->opa_hook_registry[$ps_hook_name] as $vs_call) {
-				$va_tmp = explode("::", $vs_call);
-				if(sizeof($va_tmp)==2){
-					if(class_exists($va_tmp[0]) && method_exists($va_tmp[0], $va_tmp[1])){
+	private function reroute($ps_hook_name, &$pa_params)
+	{
+		if (isset($this->opa_hook_registry[$ps_hook_name]) && is_array($this->opa_hook_registry[$ps_hook_name])) {
+			foreach ($this->opa_hook_registry[$ps_hook_name] as $vs_call) {
+				$va_tmp = explode('::', $vs_call);
+				if (sizeof($va_tmp) == 2) {
+					if (class_exists($va_tmp[0]) && method_exists($va_tmp[0], $va_tmp[1])) {
 						$va_tmp[0]::{$va_tmp[1]}($pa_params);
 					}
 				}
@@ -66,18 +98,20 @@ class lhmMMSPlugin extends BaseApplicationPlugin {
 		}
 	}
 	# -------------------------------------------------------
+
 	/**
 	 * Füge Menü-Item für Scanner Import hinzu
 	 */
-	public function hookRenderMenuBar($pa_menu_bar) {
+	public function hookRenderMenuBar($pa_menu_bar)
+	{
 		if ($o_req = $this->getRequest()) {
 			$va_menu_items = array();
-			
+
 			$va_menu_items['lhm_scanner_import'] = array(
 				'displayName' => 'LHM Depot Scannerdaten',
-				"default" => array(
+				'default' => array(
 					'module' => 'lhmMMS',
-					'controller' => 'ScannerImport', 
+					'controller' => 'ScannerImport',
 					'action' => 'Index'
 				),
 				'requires' => array(
@@ -89,7 +123,7 @@ class lhmMMSPlugin extends BaseApplicationPlugin {
 				'displayName' => 'LHM Import Plausibilitätscheck',
 				'default' => array(
 					'module' => 'lhmMMS',
-					'controller' => 'SanityCheck', 
+					'controller' => 'SanityCheck',
 					'action' => 'Index'
 				),
 				'requires' => array(
@@ -150,17 +184,19 @@ class lhmMMSPlugin extends BaseApplicationPlugin {
 				)
 			);
 
-			$pa_menu_bar['LHM']['displayName'] = "LHM";
+			$pa_menu_bar['LHM']['displayName'] = 'LHM';
 			$pa_menu_bar['LHM']['navigation'] = $va_menu_items;
 		}
 
 		return $pa_menu_bar;
 	}
 	# -------------------------------------------------------
+
 	/**
 	 * Get plugin user actions
 	 */
-	static public function getRoleActionList() {
+	static public function getRoleActionList()
+	{
 		return array(
 			'can_use_mms_sanity_check' => array(
 				'label' => 'MMS Plausibilitätscheck',
@@ -181,5 +217,5 @@ class lhmMMSPlugin extends BaseApplicationPlugin {
 		);
 	}
 	# -------------------------------------------------------
-	
+
 }
