@@ -168,7 +168,7 @@ class MMSInsuranceFeatures
 				$t_loan->replaceAttribute(['loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'), 'loan_insurance_value_eur' => mmsFloatToCurrencyValue($newSum),], 'loan_insurance');
 				$t_loan->update();
 
-				mmsAddWarningBox('Es wurde ein Objekt verknüpft oder geändert. Die Versicherungssumme hat sich geändert. Bitte prüfen und erneut speichern.');
+				mmsAddInfoBox('Ein Objekt wurde verknüpft oder geändert. Die Versicherungssumme hat sich geändert. Bitte prüfen und bei Bedarf erneut speichern.');
 			}
 
 		}
