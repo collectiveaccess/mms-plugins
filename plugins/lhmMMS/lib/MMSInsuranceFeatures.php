@@ -105,7 +105,7 @@ class MMSInsuranceFeatures
 		if (!$t_loan || ($t_loan->tableName() !== 'ca_loans')) {
 			return;
 		}
-		list($sumNewRounded, $sumStoredRounded, $storedIsEmpty, $hasRelatedObjects) = self::neueSummeAusVerknüpftenObjekten($t_loan);
+		list($sumNewRounded, $sumStoredRounded, $storedIsEmpty, $hasRelatedObjects) = self::newTotalFromLinkedObjects($t_loan);
 
 
 		$t_loan->replaceAttribute(['loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'), 'loan_insurance_value_eur' => mmsFloatToCurrencyValue($sumNewRounded),], 'loan_insurance');
@@ -142,7 +142,7 @@ class MMSInsuranceFeatures
 		/** @var ca_loans $t_loan */
 		$t_loan = $pa_params['instance'];
 
-		list($sumNewRounded, $sumStoredRounded, $storedIsEmpty, $hasRelatedObjects) = self::neueSummeAusVerknüpftenObjekten($t_loan);
+		list($sumNewRounded, $sumStoredRounded, $storedIsEmpty, $hasRelatedObjects) = self::newTotalFromLinkedObjects($t_loan);
 
 
 		$t_loan->replaceAttribute(['loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'), 'loan_insurance_value_eur' => mmsFloatToCurrencyValue($sumNewRounded),], 'loan_insurance');
@@ -201,7 +201,7 @@ class MMSInsuranceFeatures
 	 * @param ca_loans $t_loan
 	 * @return array
 	 */
-	public static function neueSummeAusVerknüpftenObjekten(ca_loans $t_loan): array
+	public static function newTotalFromLinkedObjects(ca_loans $t_loan): array
 	{
 // Neue Summe aus verknüpften Objekten
 		$sumNew = self::sumLatestInsuranceValuesForLoan($t_loan);
