@@ -110,7 +110,7 @@ class MMSInsuranceFeatures
 				continue;
 			}
 
-			ksort($vals);               //der letzte Wer
+			ksort($vals);               //der letzte Wert
 			$last = array_pop($vals);
 			$sum += mmsExtractFloatFromCurrencyValue($last);
 		}
@@ -130,48 +130,99 @@ class MMSInsuranceFeatures
 			return;
 		}
 
-		// Neue Summe der verknüpften Objekte
+		// Neue Summe aus verknüpften Objekten
 		$sumNew = self::sumLatestInsuranceValuesForLoan($t_loan);
+		$sumNewRounded = round($sumNew, 2);
 
-		// Der aktuell in der DB gespeicherte Wert
+		// Aktuell gespeicherter Wert in der DB
 		$stored = $t_loan->get('ca_loans.loan_insurance.loan_insurance_value_eur', ['returnAsArray' => false]);
 		$sumStored = mmsExtractFloatFromCurrencyValue((string)$stored);
-
-		// Den Differenzwert gerundet vergleichen
-		$sumNewRounded = round($sumNew, 2);
 		$sumStoredRounded = round($sumStored, 2);
 
-		// Nur wenn ein Unterschied besteht → den neuen Wert im Formular setzen und eine Meldung ausgeben!
+		// Ist das Feld tatsächlich leer?
+		$storedIsEmpty = ($stored === null) || (trim((string)$stored) === '');
+
+		// Gibt es verknüpfte Objekte?
+		$relatedObjects = $t_loan->getRelatedItems('ca_objects');
+		$hasRelatedObjects = is_array($relatedObjects) && !empty($relatedObjects);
+
+		// Fall 1: Wenn das Feld leer ist und verknüpfte Objekte vorhanden sind → Wert setzen + Meldung
+		if ($storedIsEmpty && $hasRelatedObjects) {
+			$t_loan->replaceAttribute(['loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'), 'loan_insurance_value_eur' => mmsFloatToCurrencyValue($sumNewRounded),], 'loan_insurance');
+			// Save
+			$t_loan->update();
+
+			mmsAddInfoBox('Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden sind. ' . 'Die Summe wurde neu berechnet.');
+			return;
+		}
+
+		// Fall 2: Wenn gespeicherter und berechneter Wert unterschiedlich sind → Wert setzen + Meldung
 		if (abs($sumNewRounded - $sumStoredRounded) > 0.00001) {
 			$t_loan->replaceAttribute(['loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'), 'loan_insurance_value_eur' => mmsFloatToCurrencyValue($sumNewRounded),], 'loan_insurance');
+			mmsAddWarningBox('Neue Versicherungssumme wurde neu generiert. ' . 'Zum Anzeigen und Übernehmen des neuen Werts ist ein Speichern erforderlich.');
 
-			mmsAddWarningBox('Neue Versicherungssumme wurde automatisch generiert. ' . 'Bitte prüfen – Speichern ist erforderlich.');
+			return;
 		}
-		// Wenn gleich → nichts tun → keine Meldung.
+
+		// Werte sind gleich → nichts tun (keine Meldung und keine Änderung)
 	}
+
 
 	public static function calcLoanInsuranceVal(&$pa_params)
 	{
-
 		$tbl = $pa_params['instance']->tableName();
 
 		if ($tbl === 'ca_loans') {
+			/** @var ca_loans $t_loan */
 			$t_loan = $pa_params['instance'];
 
+			// Neue Summe aus den letzten Versicherungswerten der verknüpften Objekte
 			$newSum = self::sumLatestInsuranceValuesForLoan($t_loan);
+			$newSumRounded = round($newSum, 2);
 
+			// Aktuell gespeicherter Wert in der DB
 			$stored = $t_loan->get('ca_loans.loan_insurance.loan_insurance_value_eur', ['returnAsArray' => false]);
-			$storedFloat = mmsExtractFloatFromCurrencyValue($stored);
+			$storedFloat = mmsExtractFloatFromCurrencyValue((string)$stored);
+			$storedRounded = round($storedFloat, 2);
 
-			if (abs($newSum - $storedFloat) > 0.0001) {
-				// Im Formular eintragen und speichern
-				$t_loan->replaceAttribute(['loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'), 'loan_insurance_value_eur' => mmsFloatToCurrencyValue($newSum),], 'loan_insurance');
+			// Ist das gespeicherte Feld tatsächlich leer?
+			$storedIsEmpty = ($stored === null) || (trim((string)$stored) === '');
+
+			// Gibt es verknüpfte Objekte?
+			$relatedObjects = $t_loan->getRelatedItems('ca_objects');
+			$hasRelatedObjects = is_array($relatedObjects) && !empty($relatedObjects);
+
+			// Fall 1: Feld ist leer, aber verknüpfte Objekte sind vorhanden → Wert setzen + Info-Meldung
+			if ($storedIsEmpty && $hasRelatedObjects) {
+				$t_loan->replaceAttribute(['loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'), 'loan_insurance_value_eur' => mmsFloatToCurrencyValue($newSumRounded),], 'loan_insurance');
+
+				// Save
 				$t_loan->update();
 
-				mmsAddInfoBox('Ein Objekt wurde verknüpft oder geändert. Die Versicherungssumme hat sich geändert. Bitte prüfen und bei Bedarf erneut speichern.');
+				if (function_exists('mmsAddInfoBox')) {
+					mmsAddInfoBox('Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden waren. Die Summe wurde neu berechnet und gespeichert.');
+				} else {
+					mmsAddInfoBox('Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden waren. Die Summe wurde neu berechnet und gespeichert.');
+				}
+				return;
 			}
 
+			// Fall 2: Berechneter Wert unterscheidet sich vom gespeicherten Wert → Wert setzen + Warnmeldung
+			if (abs($newSumRounded - $storedRounded) > 0.00001) {
+				$t_loan->replaceAttribute(['loan_insurance_remark' => mmsGetSettingFromMMSPluginConfig('lhm_mms_loan_insurance_comment'), 'loan_insurance_value_eur' => mmsFloatToCurrencyValue($newSumRounded),], 'loan_insurance');
+				//save
+				$t_loan->update();
+				if (function_exists('mmsAddWarningBox')) {
+					mmsAddInfoBox('Ein Objekt wurde verknüpft oder geändert. Die Versicherungssumme hat sich geändert.');
+				} else if (function_exists('mmsAddInfoBox')) {
+					mmsAddInfoBox('Ein Objekt wurde verknüpft oder geändert. Die Versicherungssumme hat sich geändert.');
+				}
+				return;
+			}
+
+			// Werte sind gleich oder es gibt keine verknüpften Objekte → nichts tun
 		}
 	}
+
 
 }
