@@ -36,27 +36,27 @@ function mmsAddWarningBox($ps_message)
 	}
 }
 
-
-function mmsAddInfoBox($ps_message)
+function mmsAddInfoBox($ps_message, $color = '', $icon = 'fa fa-info-circle')
 {
 	global $g_request, $g_response;
 
 	if (is_object($g_response)) {
 		/** @var RequestHTTP $g_request */
 		/** @var ResponseHTTP $g_response */
-		if ($g_request->getController() != 'ScannerImport') { // keine Warnungs-Boxen beim Scanner import
+		if ($g_request->getController() != 'ScannerImport') {
+			// keine Warnungs-Boxen beim Scanner import
 			$g_response->addContent("
-				<div class='notification-info-box rounded'>
-			<ul class='notification-info-box'>
-				<li class='notification-info-box'>
-					<div class='notification-message-container'>
-						<div><i class='fa fa-info-circle' aria-hidden='true' style='font-size: 36px;'></i></div>
-						<div>{$ps_message}</div>
-					</div>
-				</li>
-             </ul>
-            </div>
-			", 'default');
+                <div class='notification-info-box rounded'>
+                    <ul class='notification-info-box'>
+                        <li class='notification-info-box'>
+                            <div class='notification-message-container'>
+                                <div><i class='" . htmlspecialchars($icon) . ' ' . htmlspecialchars($color) . "' aria-hidden='true' style='font-size:36px;'></i></div>
+                                <div class='" . htmlspecialchars($color) . "'>" . htmlspecialchars($ps_message) . '</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            ', 'default');
 		}
 	}
 }
