@@ -3,7 +3,7 @@
  * MMSInsuranceFeatures.php : Enthält statische Funktionen zur
  * automatischen Generierung von Versicherungswerten für Leihgaben
  * ----------------------------------------------------------------------
- * Copyright 2014 Landeshauptstadt München
+ * Copyright 2025 Landeshauptstadt München
  * @version 0.1
  * ----------------------------------------------------------------------
  */
@@ -19,6 +19,8 @@ class MMSInsuranceFeatures
 	 * @param $pa_params
 	 * @return void
 	 */
+
+
 	public static function rememberOldInsuranceValue(&$pa_params)
 	{
 		$po_object = $pa_params['instance'];
@@ -30,15 +32,11 @@ class MMSInsuranceFeatures
 		$id = $po_object->getPrimaryKey();
 
 		// Vorherigen Wert als Array speichern
-		self::$oldInsuranceVals[$id] = $po_object->get('insurance_value_current', ['returnAsArray' => true]);
+		self::$oldInsuranceVals[$id] = $po_object->get('insurance_value_current', ['returnAsArray' => true, 'returnWithStructure' => true, 'returnWithIdentifiers' => true   // wichtig: attribute_id mitnehmen
+		]);
 	}
 
-	/**
-	 * Wird nach dem Speichern aufgerufen, prüft Änderungen und speichert alten Wert historisch
-	 *
-	 * @param $pa_params
-	 * @return void
-	 */
+
 	public static function handleInsuranceValueHistoryOnUpdate(&$pa_params)
 	{
 		$po_object = $pa_params['instance'];
@@ -49,8 +47,10 @@ class MMSInsuranceFeatures
 
 		$id = $po_object->getPrimaryKey();
 		$oldVals = self::$oldInsuranceVals[$id] ?? null;
-		$newVals = $po_object->get('insurance_value_current', ['returnAsArray' => true]);
 
+		// Neuen Wert abrufen
+		$newVals = $po_object->get('insurance_value_current', ['returnAsArray' => true, 'returnWithStructure' => true, 'returnWithIdentifiers' => true   // wichtig: attribute_id mitnehmen
+		]);
 
 		// Keine Änderung oder keine alten/neuen Werte → kein Handlungsbedarf
 		if (!$oldVals || !$newVals || json_encode($oldVals) === json_encode($newVals)) {
@@ -67,24 +67,30 @@ class MMSInsuranceFeatures
 			$po_object->removeAttributes('insurance_value_historic');
 		}
 
-		foreach ($oldVals as $oldVal) {
-			$parts = array_map('trim', explode(';', $oldVal));
+		$currentDate = date('Y-m-d');
+		// Alten Wert zur Historie hinzufügen
+		foreach ($oldVals as $oid => $attrList) {
+			foreach ($attrList as $aid => $vals) {
+				$historyDate = $vals['current_date'] ?? '';
+				$historyValue = $vals['current_value_eur'] ?? '';
+				$historyRemark = $vals['current_remark'] ?? '';
 
-			$date_raw = $parts[0] ?? date('Y-m-d');
-			$date_str = date('Y-m-d', strtotime($date_raw));  // gültiges Datum erzeugen
+				if ($historyDate === '' && $historyValue === '' && $historyRemark === '') {
+					continue;
+				}
 
-			$value_raw = $parts[1] ?? '';
-			$value_float = mmsExtractFloatFromCurrencyValue($value_raw);
-			$value_currency = mmsFloatToCurrencyValue($value_float);
+				$date_raw = ($historyDate !== '') ? $historyDate : $currentDate;
+				$date_str = date('Y-m-d', strtotime($date_raw));
 
-			$remark = $parts[2] ?? '';
+				$value_float = mmsExtractFloatFromCurrencyValue((string)$historyValue);
+				$value_currency = mmsFloatToCurrencyValue($value_float);
 
-			$historicData = ['historic_date' => $date_str, 'historic_value_eur' => $value_currency, 'historic_remark' => $remark,];
 
-			$po_object->addAttribute($historicData, 'insurance_value_historic');
+				$po_object->addAttribute(['historic_date' => $date_str, 'historic_value_eur' => $value_currency, 'historic_remark' => (string)$historyRemark], 'insurance_value_historic');
+			}
 		}
 
-		// Änderungen speichern
+		// Verlauf speichern und Cache leeren
 		$po_object->update();
 		unset(self::$oldInsuranceVals[$id]);
 	}
@@ -112,7 +118,8 @@ class MMSInsuranceFeatures
 
 		// Fall 1: Wenn das Feld leer ist und verknüpfte Objekte vorhanden sind → Wert setzen + Meldung
 		if ($storedIsEmpty && $hasRelatedObjects) {
-			mmsAddInfoBox('Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden sind. ' . 'Die Summe wurde neu berechnet.');
+			$intro = 'Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden sind. ' . 'Die Summe wurde neu berechnet.';
+			mmsAddInfoBox($intro, 'infoColor', 'fa fa-exclamation-triangle');
 			// Save
 			$t_loan->update();
 			return;
@@ -121,8 +128,9 @@ class MMSInsuranceFeatures
 
 		// Fall 2: Wenn gespeicherter und berechneter Wert unterschiedlich sind → Wert setzen + Meldung
 		if (abs($sumNewRounded - $sumStoredRounded) > 0.00001) {
-			mmsAddWarningBox('Neue Versicherungssumme wurde neu generiert. ' . 'Zum Anzeigen und Übernehmen des neuen Werts ist ein Speichern erforderlich.');
-			return;
+
+			$intro = 'Die Versicherungswerte eines oder mehrerer Objekte wurden verändert. Zum Übernehmen der aktualisierten Versicherungssumme bitte auf Speichern klicken.';
+			mmsAddInfoBox($intro, 'infoColor', 'fa fa-exclamation-triangle');
 		}
 
 		// Werte sind gleich → nichts tun (keine Meldung und keine Änderung)
@@ -149,13 +157,16 @@ class MMSInsuranceFeatures
 
 		// --- Fall 1: leer + verknüpfte Objekte → setzen + Info
 		if ($storedIsEmpty && $hasRelatedObjects) {
-			mmsAddInfoBox('Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden waren. Die Summe wurde neu berechnet und gespeichert.');
+			$intro = 'Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden sind. ' . 'Die Summe wurde neu berechnet.';
+			mmsAddInfoBox($intro, 'infoColor', 'fa fa-exclamation-triangle');
 			$t_loan->update();
 			return;
 		}
 		// --- Fall 2: Unterschied → setzen + Warnung
 		if (abs($sumNewRounded - $sumStoredRounded) > 0.00001) {
-			mmsAddInfoBox('Ein Objekt wurde verknüpft oder geändert. Die Versicherungssumme hat sich geändert.');
+
+			$intro = 'Die Versicherungssumme wurde aktualisiert.';
+			mmsAddInfoBox($intro, '', 'fa fa-info-circle');
 			$t_loan->update();
 			return;
 		}
