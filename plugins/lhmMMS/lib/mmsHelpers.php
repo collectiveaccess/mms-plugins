@@ -36,30 +36,40 @@ function mmsAddWarningBox($ps_message)
 	}
 }
 
-function mmsAddInfoBox($ps_message, $color = '', $icon = 'fa fa-info-circle')
+function mmsAddInfoBoxLHM($ps_message, $color = '')
 {
 	global $g_request, $g_response;
 
-	if (is_object($g_response)) {
-		/** @var RequestHTTP $g_request */
-		/** @var ResponseHTTP $g_response */
-		if ($g_request->getController() != 'ScannerImport') {
-			// keine Warnungs-Boxen beim Scanner import
-			$g_response->addContent("
-                <div class='notification-info-box rounded'>
-                    <ul class='notification-info-box'>
-                        <li class='notification-info-box'>
-                            <div class='notification-message-container'>
-                                <div><i class='" . htmlspecialchars($icon) . ' ' . htmlspecialchars($color) . "' aria-hidden='true' style='font-size:36px;'></i></div>
-                                <div class='" . htmlspecialchars($color) . "'>" . htmlspecialchars($ps_message) . '</div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            ', 'default');
-		}
+	if (!is_object($g_response)) { return; }
+	/** @var RequestHTTP $g_request */
+	/** @var ResponseHTTP $g_response */
+
+	if ($g_request->getController() === 'ScannerImport') {
+		// keine Warnungs-Boxen beim Scanner-Import
+		return;
 	}
+
+	$safeMessage = htmlspecialchars((string)$ps_message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+	// Nur zulässige Zeichen für CSS-Klassen erlauben (Buchstaben, Ziffern, -, _, Leerzeichen)
+	$safeColor   = preg_replace('/[^a-zA-Z0-9_\-\s]/', '', (string)$color);
+	$colorClass  = $safeColor ? ' ' . trim($safeColor) : '';
+
+	$html = <<<HTML
+<div class="notificationInfo rounded">
+    <ul class="notificationInfoBox {$colorClass}">
+        <li class="notificationInfoContent">
+            <div class="notificationMessageContainer {$colorClass}">
+                <div><i class="fa fa-info-circle {$colorClass}" aria-hidden="true" style="font-size:36px;"></i></div>
+                <div class="notificationMessage">{$safeMessage}</div>
+            </div>
+        </li>
+    </ul>
+</div>
+HTML;
+
+	$g_response->addContent($html, 'default');
 }
+
 
 
 /**

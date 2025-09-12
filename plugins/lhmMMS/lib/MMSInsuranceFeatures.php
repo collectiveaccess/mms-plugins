@@ -119,7 +119,7 @@ class MMSInsuranceFeatures
 		// Fall 1: Wenn das Feld leer ist und verknüpfte Objekte vorhanden sind → Wert setzen + Meldung
 		if ($storedIsEmpty && $hasRelatedObjects) {
 			$intro = 'Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden sind. ' . 'Die Summe wurde neu berechnet.';
-			mmsAddInfoBox($intro, 'infoColor', 'fa fa-exclamation-triangle');
+			mmsAddInfoBoxLHM($intro, 'infoColor');
 			// Save
 			$t_loan->update();
 			return;
@@ -130,7 +130,7 @@ class MMSInsuranceFeatures
 		if (abs($sumNewRounded - $sumStoredRounded) > 0.00001) {
 
 			$intro = 'Die Versicherungswerte eines oder mehrerer Objekte wurden verändert. Zum Übernehmen der aktualisierten Versicherungssumme bitte auf Speichern klicken.';
-			mmsAddInfoBox($intro, 'infoColor', 'fa fa-exclamation-triangle');
+			mmsAddInfoBoxLHM($intro, 'infoColor');
 		}
 
 		// Werte sind gleich → nichts tun (keine Meldung und keine Änderung)
@@ -158,7 +158,7 @@ class MMSInsuranceFeatures
 		// --- Fall 1: leer + verknüpfte Objekte → setzen + Info
 		if ($storedIsEmpty && $hasRelatedObjects) {
 			$intro = 'Die Versicherungssumme war leer, obwohl verknüpfte Objekte vorhanden sind. ' . 'Die Summe wurde neu berechnet.';
-			mmsAddInfoBox($intro, 'infoColor', 'fa fa-exclamation-triangle');
+			mmsAddInfoBoxLHM($intro, 'infoColor');
 			$t_loan->update();
 			return;
 		}
@@ -166,7 +166,7 @@ class MMSInsuranceFeatures
 		if (abs($sumNewRounded - $sumStoredRounded) > 0.00001) {
 
 			$intro = 'Die Versicherungssumme wurde aktualisiert.';
-			mmsAddInfoBox($intro, '', 'fa fa-info-circle');
+			mmsAddInfoBoxLHM($intro, '');
 			$t_loan->update();
 			return;
 		}
