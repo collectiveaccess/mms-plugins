@@ -166,7 +166,7 @@ class MMSInsuranceFeatures
 		if (abs($sumNewRounded - $sumStoredRounded) > 0.00001) {
 
 			$intro = 'Die Versicherungssumme wurde aktualisiert.';
-			mmsAddInfoBoxLHM($intro, '');
+			mmsAddInfoBoxLHM($intro, 'defaultColor');
 			$t_loan->update();
 			return;
 		}

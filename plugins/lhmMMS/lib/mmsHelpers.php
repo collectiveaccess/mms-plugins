@@ -39,36 +39,33 @@ function mmsAddWarningBox($ps_message)
 function mmsAddInfoBoxLHM($ps_message, $color = '')
 {
 	global $g_request, $g_response;
-
 	if (!is_object($g_response)) { return; }
-	/** @var RequestHTTP $g_request */
-	/** @var ResponseHTTP $g_response */
 
-	if ($g_request->getController() === 'ScannerImport') {
-		// keine Warnungs-Boxen beim Scanner-Import
-		return;
-	}
+	if ($g_request->getController() === 'ScannerImport') { return; }
 
 	$safeMessage = htmlspecialchars((string)$ps_message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-	// Nur zulässige Zeichen für CSS-Klassen erlauben (Buchstaben, Ziffern, -, _, Leerzeichen)
-	$safeColor   = preg_replace('/[^a-zA-Z0-9_\-\s]/', '', (string)$color);
-	$colorClass  = $safeColor ? ' ' . trim($safeColor) : '';
+
+
+	$color = trim((string)$color);
+	if ($color === '') { $color = 'defaultColor'; }
+
+
+	$safeColor = preg_replace('/[^a-zA-Z0-9_\-]/', '', $color);
 
 	$html = <<<HTML
-<div class="notificationInfo rounded">
-    <ul class="notificationInfoBox {$colorClass}">
-        <li class="notificationInfoContent">
-            <div class="notificationMessageContainer {$colorClass}">
-                <div><i class="fa fa-info-circle {$colorClass}" aria-hidden="true" style="font-size:36px;"></i></div>
-                <div class="notificationMessage">{$safeMessage}</div>
-            </div>
-        </li>
-    </ul>
+<div class="notificationInfo {$safeColor}">
+    <div class="notificationMessageContainer">
+        <div class="notificationIcon">
+            <i class="fa fa-info-circle" aria-hidden="true" style="font-size:36px;"></i>
+        </div>
+        <div class="notificationMessage">{$safeMessage}</div>
+    </div>
 </div>
 HTML;
 
 	$g_response->addContent($html, 'default');
 }
+
 
 
 
