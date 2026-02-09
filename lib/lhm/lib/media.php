@@ -97,6 +97,16 @@ function media_import($ps_xlsx, $ps_dir, $pb_uuid=false) {
 			}
 
 			$t_rep->load($qr_md5->get('representation_id'));
+
+            // Dadurch wird die Metadaten-Extraktion erneut ausgeführt, Ticket KULTMMS-2184
+            $t_rep->setMode(ACCESS_WRITE);
+            $t_rep->set(
+                'media',
+                $vs_local_path,
+                array('original_filename' => $vs_file)
+            );
+            $t_rep->update();
+
 		} else { // nein, erstelle neues Medium
 			$t_rep->set('type_id', $vs_type);
 			$t_rep->set('status', $vs_status);
