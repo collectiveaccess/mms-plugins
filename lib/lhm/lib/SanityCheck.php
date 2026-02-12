@@ -472,7 +472,9 @@ class SanityCheck {
 	 * @return boolean Bedingung erfüllt oder nicht?
 	 */
 	static public function checkEntitiesForLifeDates($po_sheet) {
-		return self::checkSomethingForIfOneThenBoth($po_sheet,4,5);
+        //return self::checkSomethingForIfOneThenBoth($po_sheet,4,5);
+        // E (Lebensdaten Anzeigetext) <-> F (Lebensdaten rechnerish) : Ticket[KULTMMS-2380]
+        return self::checkSomethingForIfOneThenBoth($po_sheet,5,6);
 	}
 
 	/**
