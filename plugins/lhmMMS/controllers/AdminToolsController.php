@@ -344,7 +344,7 @@ class AdminToolsController extends ActionController {
         ];
 
         $orphans_by_table = [];
-        $acc = null;
+        $acc = [];
         foreach($rel_tables as $rt) {
             $in_sql = null; $params = [];
 
@@ -365,7 +365,7 @@ class AdminToolsController extends ActionController {
         }
 
         $va_media_list = [];
-        if (sizeof($acc) && ($o_res = caMakeSearchResult('ca_object_representations', $acc))) {
+        if (!empty($acc) && ($o_res = caMakeSearchResult('ca_object_representations', $acc))) {
             while($o_res->nextHit()) {
                 $va_media_list[$o_res->get('ca_object_representations.representation_id')] = [
                     'thumbnail' => $o_res->get('ca_object_representations.media.thumbnail'),
