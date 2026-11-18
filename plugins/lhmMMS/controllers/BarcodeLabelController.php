@@ -73,7 +73,11 @@ class BarcodeLabelController extends ActionController {
 		$o_dom_pdf->set_paper($va_page_dimensions,'landscape');
 		$o_dom_pdf->load_html($vs_content);
 		@$o_dom_pdf->render();
-		@$o_dom_pdf->stream("label_{$vn_object_id}.pdf");
+
+        // Ticket[KULTMMS-2176]: Inventarnummer statt CA-ID als PDF-Dateiname verwenden.
+        // Sonderzeichen durch Bindestriche ersetzen.
+        $vs_idno = preg_replace('/[^a-zA-Z0-9_-]+/', '-', $t_object->get('idno') ?: $vn_object_id);
+        @$o_dom_pdf->stream("label_{$vs_idno}.pdf");
 
 		// clean up barcode tmp files after they've been used
 		@unlink($vs_tmp);
